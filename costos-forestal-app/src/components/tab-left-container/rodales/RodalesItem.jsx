@@ -90,6 +90,9 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
                 let rodales_sel_ = [...rodalesSelected, name_rodal];
                 setRodalesSelected(rodales_sel_);
 
+
+                _clearSelectedsAndPresents();
+
                 //cargo los present
                 loadYearsPresent(rodales_sel_);
                 loadMonthsPresent(rodales_sel_);
@@ -189,6 +192,12 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
                     let new_rod_sel = _deleteRodalFromSelected(name_rodal);
 
+                    //limpio todos los selected y presents
+
+                    _clearSelectedsAndPresents();
+
+
+
                     //empiezo a procesar todo nuevamente
                     loadYearsPresent(new_rod_sel);
 
@@ -231,6 +240,21 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
 
     }
+
+    const _clearSelectedsAndPresents = () => {
+
+        setMaterialesSelected([]);
+        setMaterialesPresent([]);
+
+        setYearsSelected([]);
+        setYearsPresent([]);
+
+        setMonthsSelected([]);
+        setMonthsPresent([]);
+
+
+    }
+
 
     const _deleteRodalFromSelected = (rodal_sel) => {
 

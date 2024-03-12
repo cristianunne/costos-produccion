@@ -218,6 +218,10 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
 
         }
 
+        if(yearsSelected.length == 0){
+            setActive(false);
+        }
+
 
     }, [active, rodalesSelected]);
 

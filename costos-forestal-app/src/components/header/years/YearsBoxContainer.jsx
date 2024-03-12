@@ -128,6 +128,8 @@ const YearsBoxContainer = () => {
             setListItemsDinamic(null);
         }
 
+
+
     }, [statusYears])
 
 
