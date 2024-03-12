@@ -1,0 +1,68 @@
+.years-container {
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+
+.month-container {
+  flex-wrap: wrap;
+}
+
+.month-container>a {
+  font-size: 10px;
+}
+
+.btn-h-35 {
+  height: 35px;
+}
+
+.years-container::-webkit-scrollbar {
+  width: 10px;
+  /* width of the entire scrollbar */
+  height: 7px;
+}
+
+.years-container::-webkit-scrollbar-track {
+  background: #182433;
+  /* color of the tracking area */
+}
+
+.years-container::-webkit-scrollbar-thumb {
+  background-color: #3055ac;
+  /* color of the scroll thumb */
+  border-radius: 4px;
+  /* roundness of the scroll thumb */
+  border: 1px solid #3055ac;
+  /* creates padding around scroll thumb */
+}
+
+
+.month-container::-webkit-scrollbar {
+  width: 10px;
+  /* width of the entire scrollbar */
+  height: 7px;
+}
+
+.month-container::-webkit-scrollbar-track {
+  background: #182433;
+  /* color of the tracking area */
+}
+
+.month-container::-webkit-scrollbar-thumb {
+  background-color: #3055ac;
+  /* color of the scroll thumb */
+  border-radius: 4px;
+  /* roundness of the scroll thumb */
+  border: 1px solid #3055ac;
+  /* creates padding around scroll thumb */
+}
+
+
+
+.is_present {
+  background-color: #2fb344;
+  color: #ffffff;
+  -webkit-transition: background-color 500ms linear;
+  -ms-transition: background-color 500ms linear;
+  transition: background-color 500ms linear;
+}
+

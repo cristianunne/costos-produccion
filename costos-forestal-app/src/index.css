@@ -1,0 +1,128 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body{
+  margin: 0px;
+}
+
+body::-webkit-scrollbar {
+  width: 12px;               /* width of the entire scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: #3055ac;        /* color of the tracking area */
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: 121f3d;    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: 3px solid #3055ac;  /* creates padding around scroll thumb */
+}
+
+
+#container{
+  flex: 1;
+  padding-right: 0;
+  padding-left: 0;
+}
+#row-container{
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#left-container{
+  height: 100vh;
+  background-color: white;
+}
+
+#main-container{
+  height: 100vh;
+  background-color: #f0f8ff00;
+}
+#left-container{
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.tabs-container{
+  height: 60vh;
+  max-height: 60vh;
+}
+
+.tab-content{
+ 
+  flex: 0.6;
+  background-color: #182433;
+ 
+}
+.tabs-header{
+  flex-wrap: wrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 2px;
+}
+
+.tabs-header::-webkit-scrollbar {
+  height: 10px;               /* width of the entire scrollbar */
+}
+
+.tabs-header::-webkit-scrollbar-track {
+  background: #ffffff;        /* color of the tracking area */
+}
+
+.tabs-header::-webkit-scrollbar-thumb {
+  background-color: #3055ac;    /* color of the scroll thumb */
+  border-radius:4px;       /* roundness of the scroll thumb */
+  border: 1px solid #3055ac;  /* creates padding around scroll thumb */
+}
+
+.tabs-item{
+  flex: 0.4;
+  background-color: #24385b;
+  color: #ffffff !important;
+
+}
+.tabs-item > a{
+  color: #ffffff !important;
+}
+.tabs-item:hover{
+  background-color: #3055ac;
+}
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active{
+  background-color: #3055ac;
+}
+
+.tab-pane{
+  padding: 0px;
+  background-color: white;
+
+}
+
+.item-list{
+  background-color: #3055ac;
+}
+
+.items-list-item{
+  margin-top: 5px;
+}
+
+.item-layer{
+  padding: 5px !important;
+  color: #ffffff;
+  cursor: pointer;
+  border: #143e72 solid 1px;
+}
+.item-layer:hover{
+  background-color: #4263eb !important;
+  color: #ffffff !important;
+}
+

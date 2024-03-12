@@ -1,0 +1,147 @@
+
+
+.unset-margin{
+    margin: unset;
+}
+
+.item-li-active{
+    background-color: #151f2c;
+}
+
+#sub-tableft-container{
+    height: 100%;
+    position: relative;
+    padding-left: 0px;
+    padding-right: 0px;
+    background-color: #182433;
+}
+
+.tab-nav-header{
+    position: inherit;
+    height: 6%;
+}
+
+.tab-content-container{
+    position: inherit;
+    height: 60%;
+    max-height: 60%;
+    overflow-y: hidden;
+}
+
+.tab-selected-container{
+    position: inherit;
+    height: 34%;
+    max-height: 36%;
+    overflow-y: hidden;
+    padding-top: 10px;
+}
+
+#items-container-TOC{
+    height: 33vh;
+
+}
+
+#toc-sub-container{
+    height: 100%;
+    overflow-y: auto;
+}
+
+#title-selection-section{
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-bottom: 5px;
+    background-color: #121f3d;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#title-selection-section > h3 {
+    margin: 0;
+}
+
+.text-item-content {
+    flex: 0.9;
+    line-height: 130%;
+    font-size: 0.9rem;
+}
+.number-item-content {
+    flex: 0.1;
+    text-align: center;
+    line-height: 130%;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover{
+    background-color: #206bc4 !important;
+    color: #ffffff !important;
+}
+
+.border-collapse{
+    border: solid 1px #206bc4;
+}
+.item-list {
+    padding: 0px !important;
+}
+.icon-subitem{
+    cursor: pointer;
+}
+
+
+.placeholder:not(.btn):not([class*=bg-]){
+    background-color: #206bc4 !important;
+}
+
+.btn-hover:hover{
+    background-color: #4263eb;
+}
+
+.nav-link {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+
+.map-show-link-container{
+    height: 50px;
+    border: solid 0.3px #4263eb;
+}
+#btn-view-map{
+    cursor: pointer;
+}
+
+#btn-view-map:hover{
+    background-color: #4263eb;
+}
+
+
+#empresas_items, #rodales_items{
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  .items-list-item{
+    height: 50vh;
+    overflow-y: auto;
+  }
+  
+  #empresas_items::-webkit-scrollbar, #rodales_items::-webkit-scrollbar {
+    width: 10px;               /* width of the entire scrollbar */
+  }
+  
+  #empresas_items::-webkit-scrollbar-track,  #rodales_items::-webkit-scrollbar-track{
+    background: #3055ac;        /* color of the tracking area */
+  }
+  
+  #empresas_items::-webkit-scrollbar-thumb, #rodales_items::-webkit-scrollbar-thumb {
+    background-color: #3055ac;    /* color of the scroll thumb */
+    border-radius: 4px;       /* roundness of the scroll thumb */
+    border: 1px solid #3055ac;  /* creates padding around scroll thumb */
+  }
+  
+  .scrollbar-color{ 
+    scrollbar-color: #4263eb transparent;
+  }
+
+  #rodales_items{
+    scrollbar-color: #4263eb transparent;
+  }
