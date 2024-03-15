@@ -42,7 +42,8 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         statusMonths, setStatusMonths,
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
-        textStatusQuery, setTextStatusQuery
+        textStatusQuery, setTextStatusQuery,
+        levels, setLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -83,34 +84,33 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
             //activo el boton
             setActive(true);
 
+            let rodales_sel_ = [...rodalesSelected, name_rodal];
+            setRodalesSelected(rodales_sel_);
+
             //consulto si el query esta seleccionado
             if (statusQuery) {
 
                 //selecciono el rodal y lo guardo en rodalesSelect
-                let rodales_sel_ = [...rodalesSelected, name_rodal];
-                setRodalesSelected(rodales_sel_);
+              
+                //debo consultar quien hizo el query porque dependiendo de eso puedo hacer el load o no
 
+                if(textStatusQuery == ORIGIN_QUERY.RODALES){
+                 
+                    alert('estoy en rodales, tengo que traer todo nuevametne sin nada selecccionado');
 
-                _clearSelectedsAndPresents();
+                    loadYearsPresent(rodales_sel_, true);
+                    loadMonthsPresent(rodales_sel_, true);
+                    loadDaysPresent(rodales_sel_, true);
 
-                //cargo los present
-                loadYearsPresent(rodales_sel_);
-                loadMonthsPresent(rodales_sel_);
-                loadDaysPresent(rodales_sel_);
+                    loadMaterialesPresent(rodales_sel_, true);
+                    loadElaboradorPresent(rodales_sel_, true);
+                    loadChoferesPresent(rodales_sel_, true);
+                    loadTransportistasPresent(rodales_sel_, true);
+                    loadCompradorPresent(rodales_sel_, true);
+    
+                  
+                } 
 
-                loadMaterialesPresent(rodales_sel_);
-                loadElaboradorPresent(rodales_sel_);
-                loadChoferesPresent(rodales_sel_);
-                loadTransportistasPresent(rodales_sel_);
-                loadCompradorPresent(rodales_sel_);
-
-                setYearsSelected([]);
-                setMonthsSelected([]);
-                setDaysSelected([]);
-
-                //setStatusYears(!statusYears);
-                //setStatusMateriales(!statusMateriales);
-                //setStatusElaborador(!statusElaborador);
 
 
             } else {
@@ -119,32 +119,32 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
                 setStatusQuery(true);
                 setTextStatusQuery(ORIGIN_QUERY.RODALES);
 
-                //selecciono el rodal y lo guardo en rodalesSelect
-                let rodales_sel_ = [name_rodal];
-                setRodalesSelected(rodales_sel_);
+                //seteo ellvl
+                setLevels({1: ORIGIN_QUERY.RODALES});
+
+                /*let elem = {1 : ORIGIN_QUERY.RODALES};
+                let keys = Object.keys(elem);
+                let length = keys.length;
+
+                console.log('Tamano del elemento: ' + length);*/
+
+
+
+                alert('activo el query de Rodales');
 
                 //cargo los present
 
-                loadYearsPresent(rodales_sel_);
-                loadMonthsPresent(rodales_sel_);
-                loadDaysPresent(rodales_sel_);
+                loadYearsPresent(rodales_sel_, true);
+                loadMonthsPresent(rodales_sel_, true);
+                loadDaysPresent(rodales_sel_, true);
 
-                loadMaterialesPresent(rodales_sel_);
-                loadElaboradorPresent(rodales_sel_);
-                loadChoferesPresent(rodales_sel_);
-                loadTransportistasPresent(rodales_sel_);
-                loadCompradorPresent(rodales_sel_);
+                loadMaterialesPresent(rodales_sel_, true);
+                loadElaboradorPresent(rodales_sel_, true);
+                loadChoferesPresent(rodales_sel_, true);
+                loadTransportistasPresent(rodales_sel_, true);
+                loadCompradorPresent(rodales_sel_, true);
 
-                 //limpio los selected
-                 setYearsSelected([]);
-                 setMonthsSelected([]);
-                 setDaysSelected([]);
-
-                //setStatusYears(!statusYears);
-                //setStatusMateriales(!statusMateriales);
-                //setStatusElaborador(!statusElaborador);
-
-                //proceso el query, tengo que traer todos los datos para el rodal actual
+            
 
             }
 
@@ -152,89 +152,95 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         } else {
             setActive(false);
 
-            //si era el ultimo rodal seleccionado, limpio el query y el textquery
-            if (rodalesSelected.length == 1) {
-                setStatusQuery(false);
-                setTextStatusQuery(null);
+            let rodales_sel_ = _deleteRodalFromSelected(name_rodal);
 
-                //reseteo todos los 
-                setYearsPresent([]);
-                setMonthsPresent([]);
-                setDaysPresent([]);
-                setMaterialesPresent([]);
-                setElaboradorPresent([]);
-                setChoferesPresent([]);
-                setTransportistaPresent([]);
-                setCompradorPresent([]);
+            if(statusQuery){
 
-                setStatusYears(!statusYears);
-                setStatusMonths(!statusMonths);
-                setStatusDays(!statusDays);
-                setStatusMateriales(!statusMateriales);
-                setStatusElaborador(!statusElaborador);
-                setStatusChoferes(!statusChoferes);
-                setStatusTransportista(!statusTransportista);
-                setStatusComprador(!statusComprador);
+                if (rodalesSelected.length == 1) {
 
-                 //limpio los selected
-                 setYearsSelected([]);
-                 setMonthsSelected([]);
-                 setDaysSelected([]);
+                    alert('queda 1 rodal');
+                    setStatusQuery(false);
+                    setTextStatusQuery(null);
+
+                    //REseteo ellvl
+                    setLevels({});
+
+ 
+                         //restauro todos como en el inicio
+                    setRodalesData(rodalesDinamicData);
+                    setRodalesPresent(rodalesDinamicData);
+                    setStatusRodales(!statusRodales);
+ 
+                    setYearsData(yearsDinamicData);
+                    setYearsPresent([]);
+                    setStatusYears(!statusYears);
+ 
+                     //reseteo los meses y dias, inicialmente estan apagados
+                    setMonthsPresent([]);
+                    setMonthsSelected([]);
+                    setStatusMonths(!statusMonths);
+  
+                    setDaysPresent([]);
+                    setDaysSelected([]);
+                    setStatusDays(!statusDays);
+ 
+                    setMaterialesData(materialesDinamicData);
+                    setMaterialesPresent([]);
+                    setMaterialesSelected([])
+                    setStatusMateriales(!statusMateriales);
+ 
+                     //ME FALTA ELABORADOR
+                    setElaboradorData(elaboradorDinamicData);
+                    setElaboradorPresent([]);
+                    setElaboradorSelected([]);
+                    setStatusElaborador(!statusElaborador);
+ 
+                     //CHOFERES
+                    setChoferesData(choferesDinamicData);
+                    setChoferesPresent([]);
+                    setChoferesSelected([]);
+                    setStatusChoferes(!statusChoferes);
+
+                    setTransportistaData(transportistaDinamicData);
+                    setTransportistaSelected([]);
+                    setTransportistaPresent([]);
+                    setStatusTransportista(!statusTransportista);
+ 
+                 
+                    setCompradorData(compradorDinamicData);
+                    setCompradorPresent([]);
+                    setCompradorSelected([]);
+                    setStatusComprador(!statusComprador);
+
+                } else {
+
+                    
+                    //estoy dentro del marco del query rodal
+                    if(textStatusQuery == ORIGIN_QUERY.RODALES){
+
+                        alert('Quedabn mas de 1 rODAL seleccionado');
+
+                        loadYearsPresent(rodales_sel_, true);
+                        loadMonthsPresent(rodales_sel_, true);
+                        loadDaysPresent(rodales_sel_, true);
+        
+                        loadMaterialesPresent(rodales_sel_, true);
+                        loadElaboradorPresent(rodales_sel_, true);
+                        loadChoferesPresent(rodales_sel_, true);
+                        loadTransportistasPresent(rodales_sel_, true);
+                        loadCompradorPresent(rodales_sel_, true);
+
+                    }
+
+                 
+            
+                }
 
             } else {
 
-                //Seguro estaremos en una query
-                //consulto el tipo de query donde estoy
-
-                if (textStatusQuery == ORIGIN_QUERY.RODALES) {
-
-                    //estoy dentro del marco del query rodal
-
-                    let new_rod_sel = _deleteRodalFromSelected(name_rodal);
-
-                    //limpio todos los selected y presents
-
-                    _clearSelectedsAndPresents();
-
-
-
-                    //empiezo a procesar todo nuevamente
-                    loadYearsPresent(new_rod_sel);
-
-                    loadMonthsPresent(new_rod_sel);
-                    loadDaysPresent(new_rod_sel);
-    
-                    loadMaterialesPresent(new_rod_sel);
-                    loadElaboradorPresent(new_rod_sel);
-                    loadChoferesPresent(new_rod_sel);
-                    loadTransportistasPresent(new_rod_sel);
-                    loadCompradorPresent(new_rod_sel);
-
-                     //reseteo todos los 
-                    setYearsPresent([]);
-                    setMonthsPresent([]);
-                    setDaysPresent([]);
-                    setMaterialesPresent([]);
-                    setElaboradorPresent([]);
-                    setChoferesPresent([]);
-                    setTransportistaPresent([]);
-                    setCompradorPresent([]);
-
-                    //limpio los selected
-                    setYearsSelected([]);
-                    setMonthsSelected([]);
-                    setDaysSelected([]);
-
-
-
-                }
-
-
             }
 
-
-
-            //elimino el rodal 
+         
 
         }
 
@@ -254,6 +260,9 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
 
     }
+
+  
+
 
 
     const _deleteRodalFromSelected = (rodal_sel) => {
@@ -284,13 +293,23 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
     //al seleccionar un rodal tengo que cargar los a;os
 
-    const loadYearsPresent = async (rodales_sel_) => {
+    const loadYearsPresent = async (rodales_sel_, is_reset) => {
 
-        setYearsPresent([]);
-        //llamo al metodo que carga los years
-        const years_pres = await getYearsPresentQuery(rodales_sel_);
+        let years_pres = null;
 
+        if(is_reset){
 
+            years_pres = await getYearsPresentQuery(rodales_sel_, [], [], [], 
+                [], []);
+
+        } else {
+
+            years_pres = await getYearsPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+                transportistaSelected, compradorSelected);
+
+        }
+
+       
         if (years_pres) {
 
             //pase lo que pase siempre traigo de nuevo los years
@@ -305,56 +324,6 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
 
 
-            /*if(yearsPresent.length == 0){
-
-                alert('sdfjoasdfjosadfjosadfoasdsfdgsdf');
-
-                let arr_ = [];
-
-                years_pres.forEach(year_query => {
-
-                    arr_.push(parseInt(year_query));
-
-                });
-
-                setYearsPresent(arr_);
- 
-            } else {
-
-            
-                let arr_ = [];
-                years_pres.forEach(year_query => {
-
-                    let is_present = false;
-
-                 
-                    yearsPresent.forEach(year => {
-
-                        let year_q = parseInt(year_query);
-
-                        if(year_q == year){
-                            is_present = true;
-
-                        }
-
-                    });
-                    
-                    if(!is_present){
-                        arr_.push(parseInt(year_query));
-                    }
-
-                });
-
-                if(arr_.length > 0){
-
-                    //aca hay un problema porque debo elminiar un elemento
-                   
-                    setYearsPresent([...yearsPresent, ...arr_])
-
-                }
-
-
-            }*/
 
         }
 
@@ -363,12 +332,22 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
     }
 
 
+    const loadMonthsPresent = async (rodales_sel_, is_reset) => {
+
+        let months_data = null;
+
+        if(is_reset){
+
+            months_data = await getMonthsPresentQuery(rodales_sel_, [], [], [], 
+            [], []);
+
+        } else {
 
 
-    const loadMonthsPresent = async (rodales_sel_) => {
+            months_data = await getMonthsPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+            transportistaSelected, compradorSelected);
 
-        //para traer los meses uso los rodales como filtro
-        const months_data = await getMonthsPresentQuery(rodales_sel_);
+        }
 
         if (months_data) {
 
@@ -381,10 +360,23 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
     }
 
-    const loadDaysPresent = async (rodales_sel_) => {
+    const loadDaysPresent = async (rodales_sel_, is_reset) => {
 
-        const days_data = await getDaysPresentQuery(rodales_sel_);
+        let days_data = null;
 
+        if(is_reset){
+
+            days_data = await getDaysPresentQuery(rodales_sel_, [], [], [], 
+                [], []);
+
+        } else {
+
+            days_data = await getDaysPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+                transportistaSelected, compradorSelected);
+
+        }
+
+    
         if (days_data) {
 
             setDaysPresent(days_data);
@@ -395,9 +387,21 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
     }
 
-    const loadMaterialesPresent = async (rodales_sel_) => {
+    const loadMaterialesPresent = async (rodales_sel_, is_reset) => {
 
-        const mat_present = await getMaterialesPresentQuery(rodales_sel_);
+        let mat_present = null;
+
+        if(is_reset){
+
+            mat_present = await getMaterialesPresentQuery(rodales_sel_, [], [], [], 
+                [], []);
+
+        } else {
+
+            mat_present = await getMaterialesPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+                transportistaSelected, compradorSelected);
+
+        }
 
         if (mat_present) {
 
@@ -409,9 +413,23 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
     }
 
-    const loadElaboradorPresent = async (rodales_sel_) => {
+    const loadElaboradorPresent = async (rodales_sel_, is_reset) => {
 
-        const ela_present = await getElaboradorPresentQuery(rodales_sel_);
+        let ela_present = null;
+
+        if(is_reset){
+
+            ela_present = await getElaboradorPresentQuery(rodales_sel_, [], [], [], 
+                [], []);
+
+        } else {
+
+            ela_present = await getElaboradorPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+                transportistaSelected, compradorSelected);
+
+        }
+
+       
 
         if (ela_present) {
 
@@ -422,9 +440,24 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
     }
 
-    const loadChoferesPresent = async (rodales_sel_) => {
+    const loadChoferesPresent = async (rodales_sel_, is_reset) => {
 
-        const choferes_data = await getChoferesPresentQuery(rodales_sel_);
+        let choferes_data = null;
+
+        if(is_reset){
+
+            choferes_data = await getChoferesPresentQuery(rodales_sel_, [], [], [], 
+                [], []);
+
+        } else {
+
+            choferes_data = await getChoferesPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+                transportistaSelected, compradorSelected);
+
+        }
+
+
+       
 
         if (choferes_data) {
             setChoferesPresent(choferes_data);
@@ -434,9 +467,20 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         setStatusChoferes(!statusChoferes);
     }
 
-    const loadTransportistasPresent = async (rodales_sel_) => {
+    const loadTransportistasPresent = async (rodales_sel_, is_reset) => {
 
-        const transportista_data = await getTransportistasPresentQuery(rodales_sel_);
+        let transportista_data = null;
+
+        if(is_reset){
+
+            transportista_data = await getTransportistasPresentQuery(rodales_sel_, [], [], [], 
+                [], []);
+        } else {
+            transportista_data = await getTransportistasPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+                transportistaSelected, compradorSelected);
+        }
+
+     
 
         if (transportista_data) {
             setTransportistaPresent(transportista_data);
@@ -447,9 +491,24 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
     }
 
-    const loadCompradorPresent = async (rodales_sel_) => {
+    const loadCompradorPresent = async (rodales_sel_, is_reset) => {
 
-        const comprador_data = await getCompradorPresentQuery(rodales_sel_);
+        let comprador_data = null;
+
+        if(is_reset){
+
+            comprador_data = await getCompradorPresentQuery(rodales_sel_, [], [], [], 
+                [], []);
+
+        } else {
+
+            comprador_data = await getCompradorPresentQuery(rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
+                transportistaSelected, compradorSelected);
+
+        }
+
+
+       
 
         if (comprador_data) {
 
@@ -466,8 +525,14 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
     useEffect(() => {
 
+        if(rodalesSelected.length == 0){
 
-    }, [active])
+            setActive(false);
+
+        }
+
+
+    }, [active, rodalesSelected])
 
 
 

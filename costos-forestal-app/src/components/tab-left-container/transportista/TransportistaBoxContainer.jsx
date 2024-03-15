@@ -79,54 +79,91 @@ const TransportistaBoxContainer = () => {
         //ordeno la data
 
         let transportistas = _ordenarData(transportistas_);
-
-
-
         let items_ = [];
 
-        if (transportistaPresent.length > 0) {
+        if(statusQuery){
+            if (transportistaPresent.length > 0) {
 
-            let ites_aux = [];
-
-            transportistaPresent.forEach(tran_present => {
-
-                Object.entries(transportistas).forEach(([key, value]) => {
-
-                    if (value.idtransporte == tran_present.idtransporte) {
-
-                        ites_aux.push(value);
-
-                    }
-
+                let ites_aux = [];
+    
+                transportistaPresent.forEach(tran_present => {
+    
+                    Object.entries(transportistas).forEach(([key, value]) => {
+    
+                        if (value.idtransporte == tran_present.idtransporte) {
+    
+                            ites_aux.push(value);
+    
+                        }
+    
+                    });
                 });
-            });
-
-            //ordeno ies_aux
-
-            let items_aux_ord = _ordenarData(ites_aux);
-
-            Object.entries(items_aux_ord).forEach(([key, value]) => {
-
-                let item = <TransportistaItem name_transportista={value.txttransporte} idtransportista={value.idtransporte}
-                    transportista={value} key={key + value.idtransporte} is_present={true}></TransportistaItem>
-                items_.push(item);
-
-            });
-
-
+    
+                //ordeno ies_aux
+    
+                let items_aux_ord = _ordenarData(ites_aux);
+    
+                Object.entries(items_aux_ord).forEach(([key, value]) => {
+    
+                    let item = <TransportistaItem name_transportista={value.txttransporte} idtransportista={value.idtransporte}
+                        transportista={value} key={key + value.idtransporte} is_present={true}></TransportistaItem>
+                    items_.push(item);
+    
+                });
+    
+    
+    
+            } 
 
         } else {
+            if (transportistaPresent.length > 0) {
 
-            Object.entries(transportistas).forEach(([key, value]) => {
-
-                //tengo que crear los items aca
-                let item = <TransportistaItem name_transportista={value.txttransporte} idtransportista={value.idtransporte}
-                    transportista={value} key={key + value.idtransporte} is_present={false}></TransportistaItem>
-                items_.push(item);
-
-            });
+                let ites_aux = [];
+    
+                transportistaPresent.forEach(tran_present => {
+    
+                    Object.entries(transportistas).forEach(([key, value]) => {
+    
+                        if (value.idtransporte == tran_present.idtransporte) {
+    
+                            ites_aux.push(value);
+    
+                        }
+    
+                    });
+                });
+    
+                //ordeno ies_aux
+    
+                let items_aux_ord = _ordenarData(ites_aux);
+    
+                Object.entries(items_aux_ord).forEach(([key, value]) => {
+    
+                    let item = <TransportistaItem name_transportista={value.txttransporte} idtransportista={value.idtransporte}
+                        transportista={value} key={key + value.idtransporte} is_present={true}></TransportistaItem>
+                    items_.push(item);
+    
+                });
+    
+    
+    
+            } else {
+    
+                Object.entries(transportistas).forEach(([key, value]) => {
+    
+                    //tengo que crear los items aca
+                    let item = <TransportistaItem name_transportista={value.txttransporte} idtransportista={value.idtransporte}
+                        transportista={value} key={key + value.idtransporte} is_present={false}></TransportistaItem>
+                    items_.push(item);
+    
+                });
+    
+            }
 
         }
+
+
+      
 
 
         setListItems(items_);
@@ -156,14 +193,22 @@ const TransportistaBoxContainer = () => {
 
     useEffect(() => {
 
-
-        if (transportistaData != null && transportistaData.length > 0) {
+        if(statusQuery){
             createItems(transportistaData);
-
         } else {
-            setListItems(null);
-            setListItemsDinamic(null);
+
+            if (transportistaData != null && transportistaData.length > 0) {
+                createItems(transportistaData);
+    
+            } else {
+                setListItems(null);
+                setListItemsDinamic(null);
+            }
+
         }
+
+
+    
 
     }, [statusTransportista])
 

@@ -52,7 +52,9 @@ const StatusGlobalContext = React.createContext({
 
     //creo una variabe global para saber quien hizo el query
     statusQuery: false, setStatusQuery: () => {},
-    textStatusQuery: null, setTextStatusQuery: () => {}
+    textStatusQuery: null, setTextStatusQuery: () => {},
+
+    levels: {}, setLevels: () => {},
 
 
 });
@@ -88,6 +90,8 @@ const PresentGlobalContext = React.createContext({
     daysPresent: [], setDaysPresent: () => {},
 
 });
+
+
 
 
 export {DataGlobalContext};

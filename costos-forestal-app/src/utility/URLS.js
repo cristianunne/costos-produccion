@@ -24,4 +24,6 @@ export const URLS = {
 
     GET_MONTHS_PRESENT_FORESTAL: url_api + 'getMonthsPresentForestal',
     GET_DAYS_PRESENT_FORESTAL: url_api + 'getDaysPresentForestal',
+
+    GET_RODALES_PRESENT_FORESTAL: url_api + 'getRodalesPresentForestal',
 }

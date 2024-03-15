@@ -77,35 +77,62 @@ const CompradoresBoxContainer = () => {
 
         let items_ = [];
 
-        if (compradorPresent.length > 0) {
+        if(statusQuery){
+            if (compradorPresent.length > 0) {
 
-            compradorPresent.forEach(comp_pres => {
-                Object.entries(compradores).forEach(([key, value]) => {
-
-                    if (comp_pres.comprador == value.comprador) {
-
-                        //tengo que crear los items aca
-                        let item = <CompradoresItem name_comprador={value.comprador} id_comprador={value.comprador}
-                            transportista={value} key={value.comprador} is_present={true}></CompradoresItem>
-                        items_.push(item);
-                    }
-
+                compradorPresent.forEach(comp_pres => {
+                    Object.entries(compradores).forEach(([key, value]) => {
+    
+                        if (comp_pres.comprador == value.comprador) {
+    
+                            //tengo que crear los items aca
+                            let item = <CompradoresItem name_comprador={value.comprador} id_comprador={value.comprador}
+                                transportista={value} key={value.comprador} is_present={true}></CompradoresItem>
+                            items_.push(item);
+                        }
+    
+                    });
+    
                 });
-
-            });
+    
+            }
 
         } else {
 
-            Object.entries(compradores).forEach(([key, value]) => {
+            if (compradorPresent.length > 0) {
 
-                //tengo que crear los items aca
-                let item = <CompradoresItem name_comprador={value.comprador} id_comprador={value.comprador}
-                    transportista={value} key={value.comprador} is_present={false}></CompradoresItem>
-                items_.push(item);
-
-            });
+                compradorPresent.forEach(comp_pres => {
+                    Object.entries(compradores).forEach(([key, value]) => {
+    
+                        if (comp_pres.comprador == value.comprador) {
+    
+                            //tengo que crear los items aca
+                            let item = <CompradoresItem name_comprador={value.comprador} id_comprador={value.comprador}
+                                transportista={value} key={value.comprador} is_present={true}></CompradoresItem>
+                            items_.push(item);
+                        }
+    
+                    });
+    
+                });
+    
+            } else {
+    
+                Object.entries(compradores).forEach(([key, value]) => {
+    
+                    //tengo que crear los items aca
+                    let item = <CompradoresItem name_comprador={value.comprador} id_comprador={value.comprador}
+                        transportista={value} key={value.comprador} is_present={false}></CompradoresItem>
+                    items_.push(item);
+    
+                });
+    
+            }
 
         }
+
+
+     
 
 
         setListItems(items_);
@@ -115,15 +142,22 @@ const CompradoresBoxContainer = () => {
 
     useEffect(() => {
 
-
-        if (compradorData != null && compradorData.length > 0) {
+        if(statusQuery){
             createItems(compradorData);
 
         } else {
-            setListItems(null);
-            setListItemsDinamic(null);
+            if (compradorData != null && compradorData.length > 0) {
+                createItems(compradorData);
+    
+            } else {
+                setListItems(null);
+                setListItemsDinamic(null);
+            }
+
         }
 
+
+    
     }, [statusComprador])
 
     return (

@@ -28,8 +28,13 @@ const ChoferesBoxContainer = () => {
         statusElaborador, setStatusElaborador,
         statusChoferes, setStatusChoferes,
         statusTransportista, setStatusTransportista,
-        statusComprador, setStatusComprador } = useContext(StatusGlobalContext);
-
+        statusComprador, setStatusComprador,
+        statusYears, setStatusYears,
+        statusMonths, setStatusMonths,
+        statusDays, setStatusDays,
+        statusQuery, setStatusQuery,
+        textStatusQuery, setTextStatusQuery
+    } = useContext(StatusGlobalContext);
     const {
         rodalesPresent, setRodalesPresent,
         empresasPresent, setEmpresasPresent,
@@ -53,58 +58,92 @@ const ChoferesBoxContainer = () => {
     const createItems = (choferes_) => {
 
         let choferes = _ordenarData(choferes_);
-
-
         let items_ = [];
 
+        if(statusQuery){
 
+            if (choferesPresent.length > 0) {
 
-        if (choferesPresent.length > 0) {
-
-            let ites_aux = [];
-
-            choferesPresent.forEach(chof_pres => {
-
-
-                Object.entries(choferes).forEach(([key, value]) => {
-
-                    if (value.idchofer == chof_pres.idchofer) {
-
-                        ites_aux.push(value);
-
-                    }
-
+                let ites_aux = [];
+    
+                choferesPresent.forEach(chof_pres => {
+    
+    
+                    Object.entries(choferes).forEach(([key, value]) => {
+    
+                        if (value.idchofer == chof_pres.idchofer) {
+    
+                            ites_aux.push(value);
+    
+                        }
+    
+                    });
+    
                 });
-
-            });
-
-            //ordeno ies_aux
-
-            let items_aux_ord = _ordenarData(ites_aux);
-
-            Object.entries(items_aux_ord).forEach(([key, value]) => {
-                //tengo que crear los items aca
-                let item = <ChoferesItem name_chofer={value.txtchofer} idchofer={value.idchofer}
-                    chofer={value} key={key + value.idchofer} is_present={true}></ChoferesItem>
-                items_.push(item);
-
-            });
-
+    
+                //ordeno ies_aux
+    
+                let items_aux_ord = _ordenarData(ites_aux);
+    
+                Object.entries(items_aux_ord).forEach(([key, value]) => {
+                    //tengo que crear los items aca
+                    let item = <ChoferesItem name_chofer={value.txtchofer} idchofer={value.idchofer}
+                        chofer={value} key={key + value.idchofer} is_present={true}></ChoferesItem>
+                    items_.push(item);
+    
+                });
+    
+    
+            }
 
         } else {
+            if (choferesPresent.length > 0) {
 
-            Object.entries(choferes).forEach(([key, value]) => {
-
-                //tengo que crear los items aca
-                let item = <ChoferesItem name_chofer={value.txtchofer} idchofer={value.idchofer}
-                    chofer={value} key={key + value.idchofer} is_present={false}></ChoferesItem>
-                items_.push(item);
-
-            });
+                let ites_aux = [];
+    
+                choferesPresent.forEach(chof_pres => {
+    
+    
+                    Object.entries(choferes).forEach(([key, value]) => {
+    
+                        if (value.idchofer == chof_pres.idchofer) {
+    
+                            ites_aux.push(value);
+    
+                        }
+    
+                    });
+    
+                });
+    
+                //ordeno ies_aux
+    
+                let items_aux_ord = _ordenarData(ites_aux);
+    
+                Object.entries(items_aux_ord).forEach(([key, value]) => {
+                    //tengo que crear los items aca
+                    let item = <ChoferesItem name_chofer={value.txtchofer} idchofer={value.idchofer}
+                        chofer={value} key={key + value.idchofer} is_present={true}></ChoferesItem>
+                    items_.push(item);
+    
+                });
+    
+    
+            } else {
+    
+                Object.entries(choferes).forEach(([key, value]) => {
+    
+                    //tengo que crear los items aca
+                    let item = <ChoferesItem name_chofer={value.txtchofer} idchofer={value.idchofer}
+                        chofer={value} key={key + value.idchofer} is_present={false}></ChoferesItem>
+                    items_.push(item);
+    
+                });
+    
+            }
 
         }
 
-        setListItems(null);
 
         setListItems(items_);
         setListItemsDinamic(items_);
@@ -131,15 +170,22 @@ const ChoferesBoxContainer = () => {
 
     useEffect(() => {
 
-
-
-        if (choferesData != null && choferesData.length > 0) {
+        if(statusQuery){
             createItems(choferesData);
-
         } else {
-            setListItems(null);
-            setListItemsDinamic(null);
+
+            if (choferesData != null && choferesData.length > 0) {
+                createItems(choferesData);
+    
+            } else {
+                setListItems(null);
+                setListItemsDinamic(null);
+            }
+
         }
+
+
+       
 
     }, [statusChoferes]);
 

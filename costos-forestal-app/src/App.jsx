@@ -62,6 +62,7 @@ function App() {
   //estados utilizados para saber quien hizo el Query inicialmente y proceder en virtud de este evento
   const [statusQuery, setStatusQuery] = useState(false);
   const [textStatusQuery, setTextStatusQuery] = useState(null);
+  const [levels, setLevels] = useState({});
 
 
 
@@ -103,7 +104,7 @@ function App() {
     if (data_years) {
 
       setYearsData(data_years);
-      setDaysDinamicData(data_years);
+      setYearsDinamicData(data_years);
 
       setStatusYearsGeneral(!statusYearsGeneral);
       setStatusYears(!statusYears);
@@ -161,7 +162,8 @@ function App() {
           statusMonths, setStatusMonths,
           statusDays, setStatusDays,
           statusQuery, setStatusQuery,
-          textStatusQuery, setTextStatusQuery
+          textStatusQuery, setTextStatusQuery,
+          levels, setLevels
 
         }}>
 

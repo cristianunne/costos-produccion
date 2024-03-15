@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import '../../styles/search/search.css'
 
 
-const SearchInput = ({onChangeBuscar}) => {
+const SearchInput = ({onChangeBuscar, text_place}) => {
 
     const [value, setValue] = useState()
 
@@ -21,7 +21,7 @@ const SearchInput = ({onChangeBuscar}) => {
                             <path d="M21 21l-6 -6"></path></svg>
                     </span>
                     <input type="text" id="input-buscar-rodal" onKeyUp={onChangeBuscar} className="form-control"
-                        placeholder="Filtrar..." aria-label="Buscar Rodal" />
+                        placeholder={text_place} aria-label="Buscar Rodal" />
                 </div>
 
             </div>

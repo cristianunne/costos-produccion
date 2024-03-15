@@ -212,6 +212,9 @@ const TabLeftContainer = () => {
 
     const filter = (textBusqueda, option) => {
 
+
+        //tengo que revisar que haya ingresado por rodales select
+
         if (option == 1) {
 
     
@@ -355,7 +358,7 @@ const TabLeftContainer = () => {
 
                     <div className="tab-pane bg-dark" id="tabs-materiales">
 
-                        <SearchInput onChangeBuscar={null}></SearchInput>
+                        <SearchInput onChangeBuscar={null} text_place={'Filtrar Material...'}></SearchInput>
 
                         <div className="hr-text unset-margin mb-4">Materiales</div>
 

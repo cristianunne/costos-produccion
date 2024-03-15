@@ -3,7 +3,7 @@
 En este archivo se ejecuta toda la logica de la aplicacion
 */
 
-import { getChoferesPresentAPI, getCompradorPresentAPI, getDaysPresentAPI, getElaboradorPresentAPI, getMaterialesPresentAPI, getMonthsPresentAPI, getTransportistasPresentAPI, getYearsPresentAPI } from "./Querys";
+import { getChoferesPresentAPI, getCompradorPresentAPI, getDaysPresentAPI, getElaboradorPresentAPI, getMaterialesPresentAPI, getMonthsPresentAPI, getRodalesPresentAPI, getTransportistasPresentAPI, getYearsPresentAPI } from "./Querys";
 
 
 
@@ -24,7 +24,8 @@ const processQueryFunction = (rodales_sel, materiales_sel, elaborador_sel, chofe
 }
 
 
-export const getYearsPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel) => {
+export const getYearsPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+    transportista_sel, comprador_sel) => {
 
 
     let filter_data = {};
@@ -166,6 +167,26 @@ export const getDaysPresentQuery = async (rodales_sel, materiales_sel, elaborado
     filter_data['months'] = month_sel;
 
     const ela_present = await getDaysPresentAPI(filter_data);
+
+    return ela_present;
+
+    
+} 
+
+export const getRodalesPresentQuery = async (materiales_sel, elaborador_sel, chofer_sel, 
+    transportista_sel, comprador_sel, years_sel, month_sel) => {
+
+    let filter_data = {};
+
+    filter_data['materiales'] = materiales_sel;
+    filter_data['elaborador'] = elaborador_sel;
+    filter_data['chofer'] = chofer_sel;
+    filter_data['transportista'] = transportista_sel;
+    filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
+    filter_data['months'] = month_sel;
+
+    const ela_present = await getRodalesPresentAPI(filter_data);
 
     return ela_present;
 
