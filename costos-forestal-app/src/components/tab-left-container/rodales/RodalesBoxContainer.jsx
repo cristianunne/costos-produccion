@@ -64,9 +64,11 @@ const RodalesBoxContainer = () => {
 
 
 
-    const createItems = (rodales) => {
+    const createItems = (rodales_) => {
 
         setListItems([]);
+
+        let rodales = _ordenarData(rodales_);
 
         let items_ = [];
 
@@ -125,11 +127,32 @@ const RodalesBoxContainer = () => {
     }
 
 
+    const _ordenarData = (data_rod) => {
+
+        data_rod.sort(function (a, b) {
+            if (a.rodal > b.rodal) {
+                return 1;
+            }
+            if (a.rodal < b.rodal) {
+                return -1;
+            }
+            // a must be equal to b
+            return 0;
+        });
+
+        return data_rod;
+
+    }
+
+
 
 
     useEffect(() => {
 
 
+        console.log('reinicio de ROdales box');
+
+       
         if (rodalesData != null && rodalesData.length > 0) {
 
     

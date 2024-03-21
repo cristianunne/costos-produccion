@@ -3,7 +3,7 @@
 En este archivo se ejecuta toda la logica de la aplicacion
 */
 
-import { getChoferesPresentAPI, getCompradorPresentAPI, getDaysPresentAPI, getElaboradorPresentAPI, getMaterialesPresentAPI, getMonthsPresentAPI, getRodalesPresentAPI, getTransportistasPresentAPI, getYearsPresentAPI } from "./Querys";
+import { getChoferesPresentAPI, getCompradorPresentAPI, getDaysPresentAPI, getElaboradorPresentAPI, getEmpresasPresentAPI, getMaterialesPresentAPI, getMonthsPresentAPI, getRodalesPresentAPI, getTransportistasPresentAPI, getYearsPresentAPI } from "./Querys";
 
 
 
@@ -24,12 +24,13 @@ const processQueryFunction = (rodales_sel, materiales_sel, elaborador_sel, chofe
 }
 
 
-export const getYearsPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+export const getYearsPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
     transportista_sel, comprador_sel) => {
 
 
     let filter_data = {};
 
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
@@ -43,16 +44,18 @@ export const getYearsPresentQuery = async (rodales_sel, materiales_sel, elaborad
   
 }
 
-export const getMaterialesPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel) => {
+export const getMaterialesPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel) => {
 
     let filter_data = {};
 
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
     filter_data['chofer'] = chofer_sel;
     filter_data['transportista'] = transportista_sel;
     filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
 
     const mat_present = await getMaterialesPresentAPI(filter_data);
 
@@ -61,16 +64,18 @@ export const getMaterialesPresentQuery = async (rodales_sel, materiales_sel, ela
     
 } 
 
-export const getElaboradorPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel) => {
+export const getElaboradorPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel) => {
 
     let filter_data = {};
 
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
     filter_data['chofer'] = chofer_sel;
     filter_data['transportista'] = transportista_sel;
     filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
 
     const ela_present = await getElaboradorPresentAPI(filter_data);
 
@@ -79,16 +84,18 @@ export const getElaboradorPresentQuery = async (rodales_sel, materiales_sel, ela
     
 } 
 
-export const getChoferesPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel) => {
+export const getChoferesPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel) => {
 
     let filter_data = {};
 
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
     filter_data['chofer'] = chofer_sel;
     filter_data['transportista'] = transportista_sel;
     filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
 
     const ela_present = await getChoferesPresentAPI(filter_data);
 
@@ -97,16 +104,18 @@ export const getChoferesPresentQuery = async (rodales_sel, materiales_sel, elabo
     
 } 
 
-export const getTransportistasPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel) => {
+export const getTransportistasPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel) => {
 
     let filter_data = {};
 
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
     filter_data['chofer'] = chofer_sel;
     filter_data['transportista'] = transportista_sel;
     filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
 
     const ela_present = await getTransportistasPresentAPI(filter_data);
 
@@ -115,16 +124,18 @@ export const getTransportistasPresentQuery = async (rodales_sel, materiales_sel,
     
 } 
 
-export const getCompradorPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel) => {
+export const getCompradorPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel) => {
 
     let filter_data = {};
 
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
     filter_data['chofer'] = chofer_sel;
     filter_data['transportista'] = transportista_sel;
     filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
 
     const ela_present = await getCompradorPresentAPI(filter_data);
 
@@ -132,11 +143,12 @@ export const getCompradorPresentQuery = async (rodales_sel, materiales_sel, elab
 
 } 
 
-export const getMonthsPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+export const getMonthsPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
     transportista_sel, comprador_sel, years_sel) => {
 
     let filter_data = {};
-
+    
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
@@ -152,11 +164,12 @@ export const getMonthsPresentQuery = async (rodales_sel, materiales_sel, elabora
     
 }
 
-export const getDaysPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+export const getDaysPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
     transportista_sel, comprador_sel, years_sel, month_sel) => {
 
     let filter_data = {};
 
+    filter_data['empresa'] = empresa_sel;
     filter_data['rodales'] = rodales_sel;
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
@@ -173,10 +186,12 @@ export const getDaysPresentQuery = async (rodales_sel, materiales_sel, elaborado
     
 } 
 
-export const getRodalesPresentQuery = async (materiales_sel, elaborador_sel, chofer_sel, 
+export const getRodalesPresentQuery = async (empresa_sel, materiales_sel, elaborador_sel, chofer_sel, 
     transportista_sel, comprador_sel, years_sel, month_sel) => {
 
     let filter_data = {};
+
+    filter_data['empresa'] = empresa_sel;
 
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
@@ -191,7 +206,32 @@ export const getRodalesPresentQuery = async (materiales_sel, elaborador_sel, cho
     return ela_present;
 
     
-} 
+}
+
+
+export const getEmpresasPresentQuery = async (rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+    transportista_sel, comprador_sel, years_sel, month_sel) => {
+
+    let filter_data = {};
+
+    filter_data['rodales'] = rodales_sel;
+    filter_data['materiales'] = materiales_sel;
+    filter_data['elaborador'] = elaborador_sel;
+    filter_data['chofer'] = chofer_sel;
+    filter_data['transportista'] = transportista_sel;
+    filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
+    filter_data['months'] = month_sel;
+
+    const ela_present = await getEmpresasPresentAPI(filter_data);
+
+    return ela_present;
+
+    
+}
+
+
+
 
 
 

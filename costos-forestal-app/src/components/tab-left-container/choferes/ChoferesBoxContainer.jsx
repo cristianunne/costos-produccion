@@ -62,6 +62,8 @@ const ChoferesBoxContainer = () => {
 
         if(statusQuery){
 
+          
+
             if (choferesPresent.length > 0) {
 
                 let ites_aux = [];
@@ -184,8 +186,6 @@ const ChoferesBoxContainer = () => {
 
         }
 
-
-       
 
     }, [statusChoferes]);
 

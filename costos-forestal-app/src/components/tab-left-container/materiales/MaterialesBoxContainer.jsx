@@ -50,10 +50,12 @@ const MaterialesBoxContainer = () => {
 
     const createItems = () => {
 
+     
         let items_ = [];
         //deberia filtrar segun el materialesPresent
         if (materialesPresent.length > 0) {
 
+            let items_aux = [];
         
             materialesPresent.forEach(mat_pres => {
 
@@ -62,12 +64,24 @@ const MaterialesBoxContainer = () => {
 
                     if(value.matnr == mat_pres.material){
 
-                        items_.push(<MaterialesItem material={value.maktx} idmaterial={value.matnr}
-                            key={value.matnr} is_present={true} is_active={false}></MaterialesItem>);
+                        /*items_.push(<MaterialesItem material={value.maktx} idmaterial={value.matnr}
+                            key={value.matnr} is_present={true} is_active={false}></MaterialesItem>);*/
+
+                            items_aux.push(value);
                     }
 
                 });
             });
+
+            let items_ord = _ordenarData(items_aux);
+
+            items_ord.forEach(value => {
+
+                items_.push(<MaterialesItem material={value.maktx} idmaterial={value.matnr}
+                            key={value.matnr} is_present={true} is_active={false}></MaterialesItem>);
+
+            });
+
 
 
         } else {
@@ -81,7 +95,29 @@ const MaterialesBoxContainer = () => {
 
         }
 
+        //aca puedo ordenar antes de llenar
+
+
+
         setListItems(items_);
+
+    }
+
+
+    const _ordenarData = (data_mat) => {
+
+        data_mat.sort(function (a, b) {
+            if (a.maktx > b.maktx) {
+                return 1;
+            }
+            if (a.maktx < b.maktx) {
+                return -1;
+            }
+            // a must be equal to b
+            return 0;
+        });
+
+        return data_mat;
 
     }
 
@@ -89,6 +125,7 @@ const MaterialesBoxContainer = () => {
 
     useEffect(() => {
 
+      
         if (materialesData != null && materialesData.length > 0) {
             createItems(materialesData);
 

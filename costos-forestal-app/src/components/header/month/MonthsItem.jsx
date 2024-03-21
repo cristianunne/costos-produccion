@@ -7,7 +7,7 @@ import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
 
 const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
 
-    
+
     const {
         rodalesData, setRodalesData,
         rodalesDinamicData, setRodalesDinamicData,
@@ -72,65 +72,60 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
         monthsPresent, setMonthsPresent,
         daysPresent, setDaysPresent
     } = useContext(PresentGlobalContext);
-    
+
 
     const [active, setActive] = useState();
 
 
     const onClickHandler = () => {
 
-        if(!active){
+        if (!active) {
             setActive(true);
 
             //tengoque haceruna seleccion considerando
             setDaysSelected([]);
 
-            if(statusQuery){
+            //imporante, porque tendria que pasarle rodales a la funcion que trae los meses
+            //traigo los meses pasando los rodales y elyear seleccionado
+            //controlo que no exista ya elnumero
+            let is_present = false;
 
+            monthsSelected.forEach(mont => {
 
-                if(textStatusQuery == ORIGIN_QUERY.RODALES){
+                if (mont == base_month) {
 
-                     //imporante, porque tendria que pasarle rodales a la funcion que trae los meses
-                    //traigo los meses pasando los rodales y elyear seleccionado
-                    //controlo que no exista ya elnumero
-                    let is_present = false;
+                    is_present = true;
 
-                    monthsSelected.forEach(mont => {
-
-                        if(mont == base_month){
-
-                            is_present = true;
-
-                        }
-
-                    });
-
-                    if(!is_present){
-
-                        let month_select = [...monthsSelected, base_month];
-                        setMonthsSelected(month_select);
-                        loadDaysPresent(month_select);
-
-
-                    }
-
-
-            
-              
                 }
+
+            });
+
+            if (!is_present) {
+
+                let month_select = [...monthsSelected, base_month];
+                setMonthsSelected(month_select);
+                loadDaysPresent(month_select);
+
             }
+
 
 
         } else {
             setActive(false);
+
+            //elimino el mes de los seleccionados
+            let month_select =  _deleteMonthSelected(base_month);
+            loadDaysPresent(month_select);
+            console.log('months_new');
+            console.log(month_select);
         }
-        
+
     }
 
     const loadDaysPresent = async (mont_sel) => {
         //rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel
 
-        const days_data = await getDaysPresentQuery(rodalesSelected, materialesSelected, elaboradorSelected, 
+        const days_data = await getDaysPresentQuery(rodalesSelected, materialesSelected, elaboradorSelected,
             choferesSelected, transportistaSelected, compradorSelected, yearsSelected, mont_sel);
 
         if (days_data) {
@@ -144,9 +139,27 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
     }
 
 
+    const _deleteMonthSelected = (month) => {
+
+        let mon = [];
+
+        monthsSelected.forEach(mon_ => {
+
+            if(month != mon_){
+                mon.push(mon_);
+            }
+
+        });
+
+        setMonthsSelected(mon);
+        return mon;
+
+    }
+
+
     useEffect(() => {
 
-        if(monthsSelected.length == 0){
+        if (monthsSelected.length == 0) {
 
             setActive(false);
 
@@ -162,7 +175,7 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
                 onClick={onClickHandler}
                 style={!active ? null : styles.active}>
                 <CalendarIcon></CalendarIcon>
-                
+
                 {text_month}
             </button> :
                 <button className="btn btn-outline-light btn-square btn-h-35 ps-1 pe-1 align-items-end btn-hover"

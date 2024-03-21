@@ -19,7 +19,7 @@ import CompradoresBoxContainer from './comprador/CompradoresBoxContainer'
 
 const TabLeftContainer = () => {
 
-    const { 
+    const {
         rodalesData, setRodalesData,
         rodalesDinamicData, setRodalesDinamicData,
         empresasData, setEmpresasData,
@@ -40,34 +40,34 @@ const TabLeftContainer = () => {
         monthsDinamicData, setMonthsDinamicData,
         daysData, setDaysData,
         daysDinamicData, setDaysDinamicData
-        } = useContext(DataGlobalContext);
+    } = useContext(DataGlobalContext);
 
-        const {
-            rodalesPresent, setRodalesPresent,
-            empresasPresent, setEmpresasPresent,
-            materialesPresent, setMaterialesPresent,
-            elaboradorPresent, setElaboradorPresent,
-            choferesPresent, setChoferesPresent,
-            transportistaPresent, setTransportistaPresent,
-            compradorPresent, setCompradorPresent,
-            yearsPresent, setYearsPresent,
-            monthsPresent, setMonthsPresent,
-            daysPresent, setDaysPresent
-        } = useContext(PresentGlobalContext);
+    const {
+        rodalesPresent, setRodalesPresent,
+        empresasPresent, setEmpresasPresent,
+        materialesPresent, setMaterialesPresent,
+        elaboradorPresent, setElaboradorPresent,
+        choferesPresent, setChoferesPresent,
+        transportistaPresent, setTransportistaPresent,
+        compradorPresent, setCompradorPresent,
+        yearsPresent, setYearsPresent,
+        monthsPresent, setMonthsPresent,
+        daysPresent, setDaysPresent
+    } = useContext(PresentGlobalContext);
 
     //traigo los reloads de los estados globales
 
-    const { 
+    const {
         statusRodales, setStatusRodales,
-          statusEmpresas, setStatusEmpresas,
-          statusMateriales, setStatusMateriales,
-          statusElaborador, setStatusElaborador,
-          statusChoferes, setStatusChoferes,
-          statusTransportista, setStatusTransportista,
-          statusComprador, setStatusComprador,
-          statusYears, setStatusYears,
-          statusMonths, setStatusMonths,
-          statusDays, setStatusDays  } = useContext(StatusGlobalContext);
+        statusEmpresas, setStatusEmpresas,
+        statusMateriales, setStatusMateriales,
+        statusElaborador, setStatusElaborador,
+        statusChoferes, setStatusChoferes,
+        statusTransportista, setStatusTransportista,
+        statusComprador, setStatusComprador,
+        statusYears, setStatusYears,
+        statusMonths, setStatusMonths,
+        statusDays, setStatusDays } = useContext(StatusGlobalContext);
 
     const [reloadTab, setReloadTab] = useState(false);
 
@@ -77,12 +77,12 @@ const TabLeftContainer = () => {
     //localstatus
     const [statusRodalesLocal, setStatusRodalesLocal] = useState(false);
 
-    
+
     const getEmpresas = async () => {
 
         const data_empresa = await getEmpresasAPI();
 
-        if(data_empresa != false) {
+        if (data_empresa != false) {
             setEmpresasData(data_empresa);
             setEmpresasDinamicData(data_empresa);
 
@@ -97,12 +97,12 @@ const TabLeftContainer = () => {
 
         const data_rodales = await getRodalesAPI();
 
-        if (data_rodales){
+        if (data_rodales) {
 
             setRodalesData(data_rodales);
             setRodalesDinamicData(data_rodales);
             setRodalesPresent(data_rodales);
-            
+
 
             setStatusRodales(!statusRodales);
             setStatusRodalesLocal(!statusRodalesLocal);
@@ -116,7 +116,7 @@ const TabLeftContainer = () => {
     const getMateriales = async () => {
         const data_materiales = await getMaterialesAPI();
 
-        if(data_materiales){
+        if (data_materiales) {
 
             setMaterialesData(data_materiales);
             setMaterialesDinamicData(data_materiales);
@@ -130,8 +130,8 @@ const TabLeftContainer = () => {
     const getElaborador = async () => {
 
         const data_elaborador = await getElaboradorAPI();
-        
-        if(data_elaborador){
+
+        if (data_elaborador) {
 
             setElaboradorData(data_elaborador);
             setElaboradorDinamicData(data_elaborador);
@@ -144,9 +144,9 @@ const TabLeftContainer = () => {
 
     const getChoferes = async () => {
         const data_choferes = await getChoferesAPI();
-    
 
-        if(data_choferes){
+
+        if (data_choferes) {
 
             setChoferesData(data_choferes);
             setChoferesDinamicData(data_choferes);
@@ -160,9 +160,9 @@ const TabLeftContainer = () => {
     const getTransportistas = async () => {
 
         const data_transport = await getTransportistasAPI();
-    
 
-        if(data_transport){
+
+        if (data_transport) {
 
             setTransportistaData(data_transport);
             setTransportistaDinamicData(data_transport);
@@ -177,7 +177,7 @@ const TabLeftContainer = () => {
     const getCompradores = async () => {
         const data_compradores = await getCompradoresAPI();
 
-        if(data_compradores){
+        if (data_compradores) {
 
             setCompradorData(data_compradores);
             setCompradorDinamicData(data_compradores);
@@ -198,14 +198,14 @@ const TabLeftContainer = () => {
     const onChangeBuscarRodales = (event) => {
 
         let text_busqueda = event.target.value;
-    
+
         if (text_busqueda != undefined) {
-    
-          setBusqueda(text_busqueda);
-          filter(text_busqueda, 1);
+
+            setBusqueda(text_busqueda);
+            filter(text_busqueda, 1);
         }
-    
-    
+
+
     }
 
 
@@ -217,69 +217,69 @@ const TabLeftContainer = () => {
 
         if (option == 1) {
 
-    
-          let resultadoFiltro = rodalesPresent.filter((elemento) => {
-    
-            if (elemento.rodal.toString().toLowerCase().includes(textBusqueda.toLowerCase())) {
-              return elemento;
-            }
-          })
 
-          //setRodalesData([]);
-          setRodalesData(resultadoFiltro);
-          setStatusRodales(!statusRodales);
-    
-    
-        } 
-    
-    
-      }
+            let resultadoFiltro = rodalesPresent.filter((elemento) => {
+
+                if (elemento.rodal.toString().toLowerCase().includes(textBusqueda.toLowerCase())) {
+                    return elemento;
+                }
+            })
+
+            //setRodalesData([]);
+            setRodalesData(resultadoFiltro);
+            setStatusRodales(!statusRodales);
+
+
+        }
+
+
+    }
 
 
     useEffect(() => {
 
 
-        if(!statusRodalesLocal){
+        if (!statusRodalesLocal) {
 
             getRodales();
 
         }
 
-        if(!statusEmpresas){
+        if (!statusEmpresas) {
 
             getEmpresas();
-            
+
         }
 
         //cargo los materiales
 
-        if(!statusMateriales){
+        if (!statusMateriales) {
             getMateriales();
         }
 
         //cargo los elaboradores
-        if(!statusElaborador){
+        if (!statusElaborador) {
 
             getElaborador();
 
         }
 
         //cargo los choferes
-        if(!statusChoferes){
+        if (!statusChoferes) {
 
             getChoferes();
 
         }
 
-         //cargo los transportistas
-         if(!statusTransportista){
+        //cargo los transportistas
+        if (!statusTransportista) {
 
             getTransportistas();
 
         }
 
         //cargo los compradores
-        if(!statusComprador){
+        if (!statusComprador) {
 
             getCompradores();
 
@@ -294,8 +294,9 @@ const TabLeftContainer = () => {
 
             <div className="col-12">
                 <ul className='nav nav-tabs card-header-tabs tabs-header bg-dark'>
-                    <ItemTabs icono={ICONOS.RODALES} title={'Rodales'} url={'tabs-rodales-ex1'} active_status={true} />
-                    <ItemTabs icono={ICONOS.EMPRESAS} title={'Empresas'} url={'tabs-empresas-ex2'} active_status={false} />
+
+                    <ItemTabs icono={ICONOS.EMPRESAS} title={'Empresas'} url={'tabs-empresas-ex2'} active_status={true} />
+                    <ItemTabs icono={ICONOS.RODALES} title={'Rodales'} url={'tabs-rodales-ex1'} active_status={false} />
                     <ItemTabs icono={ICONOS.MATERIALES} title={'Materiales'} url={'tabs-materiales'} active_status={false} />
 
                     <ItemTabs icono={ICONOS.ELABORADOR} title={'Elaborador'} url={'tabs-elaborador'} active_status={false} />
@@ -309,7 +310,32 @@ const TabLeftContainer = () => {
             <div className="col-12 tab-content-container">
                 <div className="tab-content">
 
-                    <div className="tab-pane bg-dark active show scrollbar-color" id="tabs-rodales-ex1">
+                    <div className="tab-pane bg-dark active show scrollbar-color" id="tabs-empresas-ex2">
+
+                        {// Agreggo el search de empresas
+                        }
+
+                        <SearchInput onChangeBuscar={null}></SearchInput>
+                        <div className="hr-text unset-margin mb-4">Empresas</div>
+
+                        <div className='items-list-item'>
+
+                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='empresas_items'>
+
+                                <EmpresasBoxContainer>
+
+                                </EmpresasBoxContainer>
+
+
+                            </div>
+                        </div>
+
+                        <div className="hr-text unset-margin mb-5"></div>
+
+
+                    </div>
+
+                    <div className="tab-pane bg-dark" id="tabs-rodales-ex1">
 
 
                         <SearchInput onChangeBuscar={onChangeBuscarRodales}></SearchInput>
@@ -331,30 +357,7 @@ const TabLeftContainer = () => {
                     </div>
 
 
-                    <div className="tab-pane bg-dark" id="tabs-empresas-ex2">
 
-                        {// Agreggo el search de empresas
-                        }
-
-                        <SearchInput onChangeBuscar={null}></SearchInput>
-                        <div className="hr-text unset-margin mb-4">Empresas</div>
-
-                        <div className='items-list-item'>
-
-                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='empresas_items'>
-
-                                <EmpresasBoxContainer empresas={empresasData}>
-
-                                </EmpresasBoxContainer>
-
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-5"></div>
-
-
-                    </div>
 
                     <div className="tab-pane bg-dark" id="tabs-materiales">
 
