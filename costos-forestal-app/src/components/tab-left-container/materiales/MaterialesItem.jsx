@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import MaterialesIcon from '../../../icons/MaterialesIcon'
 import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
-import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
 
 const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
@@ -110,6 +110,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                     loadMonthsPresent(mat_selects, true);
                     loadDaysPresent(mat_selects, true);
 
+                    loadEmpresasPresent(mat_selects, true);
                     //tengo que carhar mas rodales y limpiar los demas
                     loadRodalesPresent(mat_selects, true);
                     //tengo que limpiar los demas porque seleccione unnuevo material los SELCTE
@@ -165,7 +166,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                 loadMonthsPresent(mat_selects);
                 loadDaysPresent(mat_selects);
 
-
+                loadEmpresasPresent(mat_selects);
                 loadRodalesPresent(mat_selects);
                 loadChoferesPresent(mat_selects);
                 loadElaboradorPresent(mat_selects);
@@ -198,6 +199,10 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                         //llegue al ultimo, entonces cargo todo y limpio el query
                         setStatusQuery(false);
                         setTextStatusQuery(null);
+
+                        setEmpresasData(empresasDinamicData);
+                        setEmpresasPresent([]);
+                        setStatusEmpresas(!statusEmpresas);
 
                         //restauro todos como en el inicio
                         setRodalesData(rodalesDinamicData);
@@ -248,6 +253,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                         loadYearsPresent(mat_selects);
                         loadMonthsPresent(mat_selects);
                         loadDaysPresent(mat_selects);
+                        loadEmpresasPresent(elab_selects);
                         loadRodalesPresent(mat_selects);
                         loadElaboradorPresent(mat_selects);
                         loadChoferesPresent(mat_selects);
@@ -401,12 +407,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         console.log('Levles del material');
 
         //creo variables y si estanlas agrego
+        let empresas_ = [];
         let rodales_ = [];
         let choferes_ = [];
         let elaborador_ = [];
         let transportista_ = [];
         let comprador_ = [];
 
+        let is_emp = false;
         let is_rod = false;
         let is_chof = false;
         let is_elab = false;
@@ -417,6 +425,11 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
             //consulto sila key es menor dejo los selected
             if (key < lvl_current) {
+
+                if (value == ORIGIN_QUERY.EMPRESAS) {
+                    empresas_ = [...empresasSelected];
+                    is_emp = true;
+                }
 
                 if (value == ORIGIN_QUERY.RODALES) {
                     rodales_ = [...rodalesSelected];
@@ -448,30 +461,34 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         });
 
        
-        loadYearsPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
-        loadMonthsPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+        loadYearsPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+        loadMonthsPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
         loadDaysPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
 
+
+        if (!is_emp) {
+            loadEmpresasPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+        }
       
         if (!is_rod) {
-            loadRodalesPresentLevels(mat_selects, elaborador_, choferes_, transportista_, comprador_);
+            loadRodalesPresentLevels(empresas_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
         }
 
         if (!is_elab) {
             //con los datos disponibles cargo
-            loadElaboradorPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+            loadElaboradorPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
         }
 
         if (!is_chof) {
-            loadChoferesPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+            loadChoferesPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
         }
 
         if (!is_trans) {
-            loadTransportistasPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+            loadTransportistasPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
         }
 
         if (!is_comp) {
-            loadCompradorPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+            loadCompradorPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
         }
 
 
@@ -492,11 +509,11 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
             if (is_reset) {
-                years_pres = await getYearsPresentQuery([], mat_selects, [], [], [],
+                years_pres = await getYearsPresentQuery([], [], mat_selects, [], [], [],
                     []);
             } else {
                 //llamo al metodo que carga los years
-                years_pres = await getYearsPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+                years_pres = await getYearsPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                     compradorSelected);
 
             }
@@ -533,12 +550,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
             if (is_reset) {
 
                 //para traer los meses uso los rodales como filtro
-                months_data = await getMonthsPresentQuery([], mat_selects, [], [], [],
+                months_data = await getMonthsPresentQuery([], [], mat_selects, [], [], [],
                     []);
     
             } else {
                 //para traer los meses uso los rodales como filtro
-                months_data = await getMonthsPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+                months_data = await getMonthsPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                     compradorSelected);
     
             }
@@ -569,13 +586,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
             if (is_reset) {
 
-                days_data = await getDaysPresentQuery([], mat_selects, [], [], [],
+                days_data = await getDaysPresentQuery([], [], mat_selects, [], [], [],
                     []);
     
     
             } else {
     
-                days_data = await getDaysPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+                days_data = await getDaysPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                     compradorSelected);
     
             }
@@ -598,13 +615,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
     }
 
 
-    const loadYearsPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+    const loadYearsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
-            let years_pres = await getYearsPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            let years_pres = await getYearsPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
     
     
@@ -632,14 +649,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
     }
 
-    const loadMonthsPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+    const loadMonthsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
             
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
 
-            let months_data = await getMonthsPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            let months_data = await getMonthsPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
 
 
@@ -659,13 +676,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
     }
 
-    const loadDaysPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+    const loadDaysPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
-            let days_data = await getDaysPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            let days_data = await getDaysPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
     
     
@@ -694,18 +711,18 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
             if (is_reset) {
-                ela_present = await getElaboradorPresentQuery([], mat_selects, [], [], [],
+                ela_present = await getElaboradorPresentQuery([], [], mat_selects, [], [], [],
                     []);
 
             } else {
-                ela_present = await getElaboradorPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+                ela_present = await getElaboradorPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                     compradorSelected);
             }
 
         } else {
 
 
-            ela_present = await getElaboradorPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+            ela_present = await getElaboradorPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                 compradorSelected, yearsSelected);
 
         }
@@ -722,19 +739,19 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
     }
 
-    const loadElaboradorPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+    const loadElaboradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
         let ela_present = null;
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
-            ela_present = await getElaboradorPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
     
 
         } else {
 
-            ela_present = await getElaboradorPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects, yearsSelected);
     
 
@@ -760,11 +777,11 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
             if (is_reset) {
 
-                choferes_data = await getChoferesPresentQuery([], mat_selects, [], [], [],
+                choferes_data = await getChoferesPresentQuery([], [], mat_selects, [], [], [],
                     []);
 
             } else {
-                choferes_data = await getChoferesPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+                choferes_data = await getChoferesPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                     compradorSelected);
 
             }
@@ -772,7 +789,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         } else {
 
-            choferes_data = await getChoferesPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+            choferes_data = await getChoferesPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                 compradorSelected, yearsSelected);
 
         }
@@ -788,20 +805,20 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         setStatusChoferes(!statusChoferes);
     }
 
-    const loadChoferesPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+    const loadChoferesPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
         
         let choferes_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
-            choferes_data = await getChoferesPresentQuery(rod_selects, mat_selects,
+            choferes_data = await getChoferesPresentQuery(empresas_sel, rod_selects, mat_selects,
                 elab_selects, chof_selects, transp_selects,
                 comp_selects);
 
         } else {
 
-            choferes_data = await getChoferesPresentQuery(rod_selects, mat_selects,
+            choferes_data = await getChoferesPresentQuery(empresas_sel, rod_selects, mat_selects,
                 elab_selects, chof_selects, transp_selects,
                 comp_selects, yearsSelected);
 
@@ -827,11 +844,11 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
             if (is_reset) {
-                transportista_data = await getTransportistasPresentQuery([], mat_selects, [], [], [],
+                transportista_data = await getTransportistasPresentQuery([], [], mat_selects, [], [], [],
                     []);
             } else {
 
-                transportista_data = await getTransportistasPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+                transportista_data = await getTransportistasPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                     compradorSelected);
 
             }
@@ -856,7 +873,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
     }
 
-    const loadTransportistasPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+    const loadTransportistasPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
         
@@ -864,12 +881,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
-            transportista_data = await getTransportistasPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            transportista_data = await getTransportistasPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
 
         } else {
 
-            transportista_data = await getTransportistasPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            transportista_data = await getTransportistasPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects, yearsSelected);
 
         }
@@ -896,19 +913,19 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
             if (is_reset) {
-                comprador_data = await getCompradorPresentQuery(null, mat_selects, null, null, null,
+                comprador_data = await getCompradorPresentQuery([], null, mat_selects, null, null, null,
                     null);
 
             } else {
 
-                comprador_data = await getCompradorPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+                comprador_data = await getCompradorPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                     compradorSelected);
 
             }
 
         } else {
 
-            comprador_data = await getCompradorPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+            comprador_data = await getCompradorPresentQuery(empresasSelected, rodalesSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                 compradorSelected, yearsSelected);
 
         }
@@ -927,7 +944,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
     }
 
-    const loadCompradorPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+    const loadCompradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
         
@@ -936,12 +953,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
-            comprador_data = await getCompradorPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            comprador_data = await getCompradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
 
         } else {
 
-            comprador_data = await getCompradorPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+            comprador_data = await getCompradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects, yearsSelected);
 
         }
@@ -959,18 +976,17 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
     }
 
 
-
     const loadRodalesPresent = async (mat_selects) => {
 
         let rod_present = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
-            rod_present = await getRodalesPresentQuery(mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+            rod_present = await getRodalesPresentQuery(empresasSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                 compradorSelected);
 
         } else {
 
-            rod_present = await getRodalesPresentQuery(mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
+            rod_present = await getRodalesPresentQuery(empresasSelected, mat_selects, elaboradorSelected, choferesSelected, transportistaSelected,
                 compradorSelected, yearsSelected);
 
         }
@@ -1005,19 +1021,19 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
     }
 
-    const loadRodalesPresentLevels = async (mat_selects, elab_selects, chof_selects,
+    const loadRodalesPresentLevels = async (empresas_sel, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
         let rod_present = null;
         //tengo que consultar por elyears
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
-            rod_present = await getRodalesPresentQuery(mat_selects, elab_selects, chof_selects,
+            rod_present = await getRodalesPresentQuery(empresas_sel, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
 
         } else {
 
-            rod_present = await getRodalesPresentQuery(mat_selects, elab_selects, chof_selects,
+            rod_present = await getRodalesPresentQuery(empresas_sel, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects, yearsSelected);
 
         }
@@ -1046,6 +1062,102 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
             setRodalesData(rodales);
             setRodalesPresent(rodales);
             setStatusRodales(!statusRodales);
+
+        }
+
+        //setStatusMateriales(!statusMateriales);
+
+    }
+
+
+
+    const loadEmpresasPresent = async (mat_selects, is_reset) => {
+
+
+        let emp_present = null;
+
+        if (is_reset) {
+            emp_present = await getEmpresasPresentQuery([], mat_selects, [], [], [],
+                [], [], []);
+        } else {
+
+            emp_present = await getEmpresasPresentQuery(rodalesSelected, mat_selects, elaboradorSelected, choferesSelected,
+                transportistaSelected,
+                compradorSelected, [], []);
+
+        }
+
+
+        if (emp_present) {
+
+            let empresas = [];
+
+            emp_present.forEach(emp_pres => {
+                //recorro los rodalesDInamic quetiene todos
+                empresasDinamicData.forEach(emp => {
+
+                    if (emp_pres.idempresa == emp.idempresa) {
+
+                        empresas.push(emp);
+
+                    }
+
+                });
+
+            });
+
+            setEmpresasData(empresas);
+            setEmpresasPresent(empresas);
+            setStatusEmpresas(!statusEmpresas);
+
+        }
+
+        //setStatusMateriales(!statusMateriales);
+
+    }
+
+    const loadEmpresasPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+        transp_selects, comp_selects) => {
+
+
+        let emp_present = null;
+
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+            emp_present = await getEmpresasPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects, [], []);
+
+        } else {
+
+            emp_present = await getEmpresasPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects, yearsSelected, []);
+
+        }
+
+        
+
+
+        if (emp_present) {
+
+            let empresas = [];
+
+            emp_present.forEach(emp_pres => {
+                //recorro los rodalesDInamic quetiene todos
+                empresasDinamicData.forEach(emp => {
+
+                    if (emp_pres.idempresa == emp.idempresa) {
+
+                        empresas.push(emp);
+
+                    }
+
+                });
+
+            });
+
+            setEmpresasData(empresas);
+            setEmpresasPresent(empresas);
+            setStatusEmpresas(!statusEmpresas);
 
         }
 

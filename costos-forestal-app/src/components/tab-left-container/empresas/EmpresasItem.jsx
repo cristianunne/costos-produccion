@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import EmpresasIcon from '../../../icons/EmpresasIcon';
 import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
-import { getChoferesPresentQuery, getMaterialesPresentQuery, getMonthsPresentQuery, 
+import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getMaterialesPresentQuery, getMonthsPresentQuery, 
     getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
 
@@ -128,12 +128,12 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
                         //como no estaba se agrego y actualizo 
                         //tengo que averiguar en que lvl estoy para actualizar los de abajo
                         //en este caso ya tengo el lvl gracias al lenght
-                        //loadDataByLevels(obj, length, mat_selects);
+                        loadDataByLevels(obj, length, empresas_sel);
 
 
                     } else {
                         //consulto el lvl en el que staba seleccionado y actualizo los de abajo
-                        //loadDataByLevels(levels, getMaterialLevels(), mat_selects);
+                        loadDataByLevels(levels, getEmpresaLevels(), empresas_sel);
 
 
                     }
@@ -161,13 +161,13 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
             }
 
 
-
             //filterRodales();
 
-
-
-
         } else {
+
+            //desactivo el item y borro de la lista de seleccionados
+            setActive(!active);
+            let empresas_sel = deleteEmpresaSelected();
 
             if (statusQuery) {
 
@@ -262,8 +262,30 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
                     }
 
                 } else {
-                    //mensaje de errror,
-                    alert('No se puede utilizar la empresa en un Nivel');
+                  if(empresas_sel.length == 0){
+
+                    let key = Object.keys(levels).filter(function (key) {
+                        return levels[key] ===
+                            ORIGIN_QUERY.EMPRESAS
+                    })[0];
+
+                    _deleteItemFromLevels(key);
+
+                    //restauro todos sin contar el nivel actual
+                    //no hay materiales seleccionados
+                    loadDataByLevels(levels, key, empresas_sel);
+
+                  } else {
+
+                      //quedaba mas de un material, entonce hago la consulta
+                      let key = Object.keys(levels).filter(function (key) {
+                        return levels[key] ===
+                            ORIGIN_QUERY.EMPRESAS
+                    })[0];
+
+                    loadDataByLevels(levels, key, empresas_sel);
+
+                  }
                 }
 
             }
@@ -372,6 +394,27 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
     }
 
 
+    const _deleteItemFromLevels = (key_current) => {
+
+        //si el esl ultimo, elimino todos los hijos tmb
+
+        let new_obj = {};
+
+        Object.entries(levels).forEach(([key, value]) => {
+
+            //ejemplo
+            /*
+                SI estoy en la POSICION 3, tengo que dejar todas las keys menores
+            */
+            if (key < key_current) {
+                new_obj[key] = value;
+            }
+
+        });
+
+        setLevels(new_obj);
+
+    }
 
 
     const loadYearsPresent = async (empresas_sel, is_reset) => {
@@ -738,6 +781,88 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
     }
 
 
+    const loadYearsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+        transp_selects, comp_selects) => {
+
+
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+            let years_pres = await getYearsPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects);
+
+
+            if (years_pres) {
+
+                //pase lo que pase siempre traigo de nuevo los years
+                let arr_ = [];
+
+                years_pres.forEach(year_query => {
+                    arr_.push(parseInt(year_query));
+
+                });
+
+                setYearsPresent(arr_);
+
+
+            }
+            setYearsSelected([]);
+            setStatusYears(!statusYears);
+
+        }
+
+    }
+
+    const loadMonthsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+        transp_selects, comp_selects) => {
+
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+
+            let months_data = await getMonthsPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects);
+
+
+
+            if (months_data) {
+
+                setMonthsPresent(months_data);
+
+            }
+
+            setMonthsSelected([]);
+            setStatusMonths(!statusMonths);
+
+
+        }
+
+
+    }
+
+    const loadDaysPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+        transp_selects, comp_selects) => {
+
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+            let days_data = await getDaysPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects);
+
+
+
+            if (days_data) {
+
+                setDaysPresent(days_data);
+
+            }
+
+            setDaysSelected([]);
+            setStatusDays(!statusDays);
+
+        }
+
+    }
+
+
+
     const loadDataByLevels = (levels, lvl_current, empresas_sel) => {
 
         console.log('Levles del material');
@@ -797,9 +922,11 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
         });
 
        
-        /*loadYearsPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
-        loadMonthsPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
-        loadDaysPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);*/
+        loadYearsPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
+        loadMonthsPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
+        loadDaysPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
+
+        
       
         if (!is_rod) {
             loadRodalesPresentLevels(empresas_sel, materiales_, elaborador_, choferes_, transportista_, comprador_);
@@ -810,6 +937,7 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
         }
 
         if (!is_elab) {
+            console.log('Entro ene elaboradores');
             //con los datos disponibles cargo
             loadElaboradorPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
         }

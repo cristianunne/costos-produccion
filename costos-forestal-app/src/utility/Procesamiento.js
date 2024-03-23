@@ -44,6 +44,7 @@ export const getYearsPresentQuery = async (empresa_sel, rodales_sel, materiales_
   
 }
 
+
 export const getMaterialesPresentQuery = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel) => {
 
     let filter_data = {};

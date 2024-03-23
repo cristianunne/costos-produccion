@@ -125,7 +125,7 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
     const loadDaysPresent = async (mont_sel) => {
         //rodales_sel, materiales_sel, elaborador_sel, chofer_sel, transportista_sel, comprador_sel, years_sel
 
-        const days_data = await getDaysPresentQuery(rodalesSelected, materialesSelected, elaboradorSelected,
+        const days_data = await getDaysPresentQuery(empresasSelected, rodalesSelected, materialesSelected, elaboradorSelected,
             choferesSelected, transportistaSelected, compradorSelected, yearsSelected, mont_sel);
 
         if (days_data) {
