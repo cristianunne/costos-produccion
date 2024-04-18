@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
-import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getMaterialesPresentQuery, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery } from '../../../utility/Procesamiento';
+import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getExtraccionDataFunction, getMaterialesPresentQuery, getMetadataFunctionForestal, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery } from '../../../utility/Procesamiento';
 
 const YearsItem = ({ year, isPresent, has_rodales_select }) => {
     //has rodales select se utiliza porque los botones reaccionan de forma diferente si hay rodales seleccionados
@@ -43,7 +43,9 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
         textStatusQuery, setTextStatusQuery,
-        levels, setLevels
+        levels, setLevels,
+        isLoading, setIsLoading,
+        statusLevels, setStatusLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -72,12 +74,20 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
         daysPresent, setDaysPresent
     } = useContext(PresentGlobalContext);
 
+    const {
+        pagesExtraccion, setPagesExtraccion,
+        numberDataExtraccion, setNumberDataExtraccion,
+        dataExtraccion, setDataExtraccion,
+        isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+        currentPageExtraccion, setCurrentPageExtraccion
+    } = useContext(CostosGlobalContext);
+
     const [active, setActive] = useState(false);
 
     const [present, setPresent] = useState(false);
 
 
-    const onClickHandler = () => {
+    const onClickHandler = async () => {
 
         if (!active) {
             setActive(true);
@@ -107,7 +117,17 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
                     loadTransportistasPresent(years_select, true);
                     loadCompradorPresent(years_select, true);
 
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(years_select);
+                    setIsLoadingTableExtraccion(true);
+                    setIsLoading(false);
+
+
+
                 } else {
+
+
 
                     //tengoq ue consultar quien hace el query
 
@@ -117,15 +137,24 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
                     setMonthsSelected([]);
                     setDaysSelected([]);
 
-                  
+
                     loadMonthsPresent(years_select);
                     loadDaysPresent(years_select);
 
                     //cargo los demas datos
 
-                 
+                    //cargo los datos que necesito
 
-                 
+                    //cargo la tabla extraccion
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(years_select);
+                    setIsLoadingTableExtraccion(true);
+                    setIsLoading(false);
+
+
+
+
 
                 }
 
@@ -148,6 +177,13 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
                 loadTransportistasPresent(years_select, true);
                 loadCompradorPresent(years_select, true);
 
+                //cargo la tabla extraccion
+                setIsLoading(true);
+                setIsLoadingTableExtraccion(false);
+                await processQuery(years_select);
+                setIsLoadingTableExtraccion(true);
+                setIsLoading(false);
+
 
 
             }
@@ -159,71 +195,91 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
             //elimino el current de los selected
             let years_select = _deleteYearSelected(year);
 
-          
+
             //consulto el tipode query
             if (statusQuery) {
-            
-                if(textStatusQuery == ORIGIN_QUERY.YEARS){
+
+                if (textStatusQuery == ORIGIN_QUERY.YEARS) {
 
                     //consulto si es el ultimo
-                    if(years_select.length == 0){
-                       
-
-                        setStatusQuery(false);
-                        setTextStatusQuery(null);
-
-                        //restauro todos como en el inicio
-                        setEmpresasData(empresasDinamicData);
-                        setEmpresasPresent([]);
-                        setEmpresasSelected([]);
-                        setStatusEmpresas(!statusEmpresas);
+                    if (years_select.length == 0) {
 
 
-                        setRodalesData(rodalesDinamicData);
-                        setRodalesPresent([]);
-                        setRodalesSelected([]);
-                        setStatusRodales(!statusRodales);
-     
-                        setYearsData(yearsDinamicData);
-                        setYearsPresent([]);
-                        setStatusYears(!statusYears);
-     
-                         //reseteo los meses y dias, inicialmente estan apagados
-                        setMonthsPresent([]);
-                        setMonthsSelected([]);
-                        setStatusMonths(!statusMonths);
-      
-                        setDaysPresent([]);
-                        setDaysSelected([]);
-                        setStatusDays(!statusDays);
-     
-                        setMaterialesData(materialesDinamicData);
-                        setMaterialesPresent([]);
-                        setMaterialesSelected([])
-                        setStatusMateriales(!statusMateriales);
-     
-                         //ME FALTA ELABORADOR
-                        setElaboradorData(elaboradorDinamicData);
-                        setElaboradorPresent([]);
-                        setElaboradorSelected([]);
-                        setStatusElaborador(!statusElaborador);
-     
-                         //CHOFERES
-                        setChoferesData(choferesDinamicData);
-                        setChoferesPresent([]);
-                        setChoferesSelected([]);
-                        setStatusChoferes(!statusChoferes);
-    
-                        setTransportistaData(transportistaDinamicData);
-                        setTransportistaSelected([]);
-                        setTransportistaPresent([]);
-                        setStatusTransportista(!statusTransportista);
-     
-                     
-                        setCompradorData(compradorDinamicData);
-                        setCompradorPresent([]);
-                        setCompradorSelected([]);
-                        setStatusComprador(!statusComprador);
+                        setIsLoading(true);
+                        setTimeout(() => {
+
+                            //quito el query
+                            setStatusQuery(false);
+                            setTextStatusQuery(null);
+                            setLevels(null);
+                            setStatusLevels(!statusLevels);
+
+                            //restauro todo como al inicio
+
+
+                            setEmpresasData(empresasDinamicData);
+                            setEmpresasPresent([]);
+                            setEmpresasSelected([]);
+                            setStatusEmpresas(!statusEmpresas);
+
+                            //restauro todos como en el inicio
+                            setRodalesData(rodalesDinamicData);
+                            setRodalesPresent([]);
+                            setRodalesSelected([]);
+                            setStatusRodales(!statusRodales);
+
+                            setYearsData(yearsDinamicData);
+                            setYearsPresent([]);
+                            setStatusYears(!statusYears);
+
+                            //reseteo los meses y dias, inicialmente estan apagados
+                            setMonthsPresent([]);
+                            setMonthsSelected([]);
+                            setStatusMonths(!statusMonths);
+
+                            setDaysPresent([]);
+                            setDaysSelected([]);
+                            setStatusDays(!statusDays);
+
+                            setMaterialesData(materialesDinamicData);
+                            setMaterialesPresent([]);
+                            setMaterialesSelected([])
+                            setStatusMateriales(!statusMateriales);
+
+                            //ME FALTA ELABORADOR
+                            setElaboradorData(elaboradorDinamicData);
+                            setElaboradorPresent([]);
+                            setElaboradorSelected([]);
+                            setStatusElaborador(!statusElaborador);
+
+                            //CHOFERES
+                            setChoferesData(choferesDinamicData);
+                            setChoferesPresent([]);
+                            setChoferesSelected([]);
+                            setStatusChoferes(!statusChoferes);
+
+                            setTransportistaData(transportistaDinamicData);
+                            setTransportistaSelected([]);
+                            setTransportistaPresent([]);
+                            setStatusTransportista(!statusTransportista);
+
+
+                            setCompradorData(compradorDinamicData);
+                            setCompradorPresent([]);
+                            setCompradorSelected([]);
+                            setStatusComprador(!statusComprador);
+
+
+                            setIsLoadingTableExtraccion(false);
+                            setDataExtraccion([]);
+                            setCurrentPageExtraccion(1);
+                            setNumberDataExtraccion(null);
+                            setPagesExtraccion(null);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+                        }, 1000);
 
                     } else {
 
@@ -243,12 +299,19 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
                         loadTransportistasPresent(years_select);
                         loadCompradorPresent(years_select);
 
+                        //cargo la tabla extraccion
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(years_select);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
+
                     }
 
 
                 }
-                
-                else  {
+
+                else {
 
                     //imporante, porque tendria que pasarle rodales a la funcion que trae los meses
                     alert('asfasfasfasggasg');        //traigo los meses pasando los rodales y elyear seleccionado
@@ -262,12 +325,50 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
                     setMonthsSelected([]);
                     setDaysSelected([]);
 
+                    //cargo la tabla extraccion
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(years_select);
+                    setIsLoadingTableExtraccion(true);
+                    setIsLoading(false);
+
                 }
 
             }
 
 
 
+
+
+        }
+
+    }
+
+
+
+    const processQuery = async (years_select) => {
+
+        const metadata = await getMetadataFunctionForestal(empresasSelected, rodalesSelected, materialesSelected,
+            elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, years_select, monthsSelected,
+            daysSelected);
+
+
+
+        if (metadata) {
+
+            //tengo que traer los datos de costos y luego setear los metadatos
+            const data_extraccion = await getExtraccionDataFunction(empresasSelected, rodalesSelected, materialesSelected,
+                elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, years_select, monthsSelected,
+                daysSelected, 1);
+
+            if (data_extraccion) {
+
+                setNumberDataExtraccion(metadata.cantidad);
+                setPagesExtraccion(metadata.pages);
+                setDataExtraccion(data_extraccion);
+
+
+            }
 
 
         }
@@ -373,7 +474,7 @@ const YearsItem = ({ year, isPresent, has_rodales_select }) => {
 
         }
 
-      
+
 
         if (emp_present) {
 

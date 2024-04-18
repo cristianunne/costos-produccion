@@ -610,4 +610,136 @@ export const getEmpresasPresentAPI = async (filter) => {
 }
 
 
+export const getMetadataForQueryDataAPI = async (filter) => {
+
+    let headers = new Headers();
+
+
+    headers.append('Accept', 'application/json'); // This one is enough for GET requests
+    headers.append('Content-Type', 'application/json'); // This one sends body
+    headers.append('Access-Control-Allow-Origin', '*');
+
+    let data = { filter }
+
+
+    const rawResponse = await fetch(URLS.GET_METADATA_FOR_QUERY_DATA_FORESTAL, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(data)
+    });
+
+    try {
+        const content = rawResponse.json();
+        //console.log(content);
+
+        //user = content;
+        return content;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+
+}
+
+
+export const getDataExtraccionCompletoAPI = async (filter) => {
+
+    let headers = new Headers();
+
+
+    headers.append('Accept', 'application/json'); // This one is enough for GET requests
+    headers.append('Content-Type', 'application/json'); // This one sends body
+    headers.append('Access-Control-Allow-Origin', '*');
+
+    let data = { filter }
+
+
+    const rawResponse = await fetch(URLS.GET_DATA_EXTRACCION_FORESTAL, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(data)
+    });
+
+    try {
+        const content = rawResponse.json();
+        //console.log(content);
+
+        //user = content;
+        return content;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+
+}
+
+export const getResumenProduccionForestalByYearsAPI = async (years_sel) => {
+
+    let headers = new Headers();
+
+
+    headers.append('Accept', 'application/json'); // This one is enough for GET requests
+    headers.append('Content-Type', 'application/json'); // This one sends body
+    headers.append('Access-Control-Allow-Origin', '*');
+
+  
+    let filter = {};
+
+    filter['years'] = years_sel;
+
+    let data = { filter }
+
+
+    const rawResponse = await fetch(URLS.GET_RESUMEN_PRODUCCION_FORESTAL_BY_YEARS, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(data)
+    });
+
+    try {
+        const content = rawResponse.json();
+        //console.log(content);
+
+        //user = content;
+        return content;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+
+}
+
+
+export const getResumenRodalDestinoMaterialForestalAPI = async (filter) => {
+
+    let headers = new Headers();
+
+
+    headers.append('Accept', 'application/json'); // This one is enough for GET requests
+    headers.append('Content-Type', 'application/json'); // This one sends body
+    headers.append('Access-Control-Allow-Origin', '*');
+
+    let data = { filter }
+
+
+    const rawResponse = await fetch(URLS.GET_RESUMEN_RDM_FORESTAL, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(data)
+    });
+
+    try {
+        const content = rawResponse.json();
+        //console.log(content);
+
+        //user = content;
+        return content;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+
+}
+
+
 

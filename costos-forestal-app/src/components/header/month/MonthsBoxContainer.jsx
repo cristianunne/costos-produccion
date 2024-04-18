@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import MonthsItem from './MonthsItem';
 import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
 
+import HeadersYearsPlaceholder from '../../placeholders/HeadersYearsPlaceholder'
+
 const MonthsBoxContainer = () => {
 
     const {
@@ -138,8 +140,12 @@ const MonthsBoxContainer = () => {
 
     const [items, setItems] = useState([]);
 
+    const [monthsStatus, setMonthsStatus] = useState(false);
+
 
     const createItems = () => {
+
+        setMonthsStatus(false);
 
         let it_ = []
 
@@ -151,7 +157,7 @@ const MonthsBoxContainer = () => {
                 let is_present = false;
                 monthsPresent.forEach(m_present => {
 
-                    if(m_present.month == element.base_month){
+                    if (m_present.month == element.base_month) {
 
                         is_present = true;
 
@@ -180,6 +186,8 @@ const MonthsBoxContainer = () => {
 
 
         setItems(it_);
+
+        setMonthsStatus(true);
     }
 
 
@@ -192,11 +200,17 @@ const MonthsBoxContainer = () => {
     }, [statusMonths]);
 
     return (
-        <div className="col-xl-6 d-flex gap-1 month-container justify-content-center pt-3" >
 
-            {items}
+        <>
+            {!monthsStatus ? <HeadersYearsPlaceholder></HeadersYearsPlaceholder> : <div className="col-xl-6 d-flex gap-1 month-container justify-content-center pt-3" >
 
-        </div>
+                {items}
+
+            </div>
+            }
+        </>
+
+
     )
 }
 

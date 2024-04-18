@@ -3,6 +3,8 @@ import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusG
 import YearsItem from './YearsItem';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
 
+import HeadersYearsPlaceholder from '../../placeholders/HeadersYearsPlaceholder'
+
 const YearsBoxContainer = () => {
 
     const {
@@ -43,7 +45,9 @@ const YearsBoxContainer = () => {
         statusMonths, setStatusMonths,
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
-        textStatusQuery, setTextStatusQuery
+        textStatusQuery, setTextStatusQuery,
+        levels, setLevels,
+        isLoading, setIsLoading
     } = useContext(StatusGlobalContext);
 
 
@@ -79,11 +83,17 @@ const YearsBoxContainer = () => {
     const [listItems, setListItems] = useState();
     const [listItemsDinamic, setListItemsDinamic] = useState();
 
+    const [yearState, setYearState] = useState(false);
+
+
     const createItems = (years) => {
+
+        setYearState(false);
+        setIsLoading(true);
 
         let has_rodales_select = false;
         //ordenar lista
-        if(statusQuery && textStatusQuery != ORIGIN_QUERY.YEARS){
+        if (statusQuery && textStatusQuery != ORIGIN_QUERY.YEARS) {
             has_rodales_select = true;
         }
 
@@ -93,7 +103,7 @@ const YearsBoxContainer = () => {
             //tengo que recorrer rodales selected para ver si estamos presentes
             let is_present = false;
             yearsPresent.forEach(year => {
-                if(parseInt(value) == year){
+                if (parseInt(value) == year) {
                     is_present = true;
                 }
             })
@@ -106,10 +116,12 @@ const YearsBoxContainer = () => {
         });
 
 
+
         setListItems(items_);
         setListItemsDinamic(items_);
 
-  
+        setYearState(true);
+        setIsLoading(false);
 
     }
 
@@ -118,10 +130,9 @@ const YearsBoxContainer = () => {
 
     useEffect(() => {
 
-
         if (yearsData != null && yearsData.length > 0) {
             createItems(yearsData);
-        
+
 
         } else {
             setListItems(null);
@@ -135,14 +146,22 @@ const YearsBoxContainer = () => {
 
 
     return (
-        <div className="col-xl-6 pt-3 pb-2">
+
+
+        <>
+            {!yearState ? <HeadersYearsPlaceholder></HeadersYearsPlaceholder> : <div className="col-xl-6 pt-3 pb-2">
 
                 <div className='d-flex gap-1 years-container justify-content-start'>
                     {listItems}
                 </div>
 
 
-        </div>
+            </div>
+            }
+        </>
+
+
+
     )
 }
 

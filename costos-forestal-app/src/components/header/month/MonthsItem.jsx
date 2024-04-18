@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
 
 import CalendarIcon from '../../../icons/CalendarIcon'
-import { getDaysPresentQuery } from '../../../utility/Procesamiento';
+import { getDaysPresentQuery, getExtraccionDataFunction, getMetadataFunctionForestal } from '../../../utility/Procesamiento';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
 
 const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
@@ -44,7 +44,10 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
         statusMonths, setStatusMonths,
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
-        textStatusQuery, setTextStatusQuery
+        textStatusQuery, setTextStatusQuery,
+        levels, setLevels,
+        isLoading, setIsLoading,
+        statusLevels, setStatusLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -57,7 +60,7 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
         compradorSelected, setCompradorSelected,
         yearsSelected, setYearsSelected,
         monthsSelected, setMonthsSelected,
-        daysSelected, setDaysSelected
+        daysSelected, setDaysSelected,
     } = useContext(SelectedGlobalContext);
 
     const {
@@ -73,11 +76,19 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
         daysPresent, setDaysPresent
     } = useContext(PresentGlobalContext);
 
+    const {
+        pagesExtraccion, setPagesExtraccion,
+        numberDataExtraccion, setNumberDataExtraccion,
+        dataExtraccion, setDataExtraccion,
+        isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+        currentPageExtraccion, setCurrentPageExtraccion
+    } = useContext(CostosGlobalContext);
+
 
     const [active, setActive] = useState();
 
 
-    const onClickHandler = () => {
+    const onClickHandler = async () => {
 
         if (!active) {
             setActive(true);
@@ -106,6 +117,17 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
                 setMonthsSelected(month_select);
                 loadDaysPresent(month_select);
 
+                //debo hacer la consulta
+
+                //cargo la tabla extraccion
+                setIsLoading(true);
+                setIsLoadingTableExtraccion(false);
+                await processQuery(month_select);
+                setIsLoadingTableExtraccion(true);
+                setIsLoading(false);
+
+
+
             }
 
 
@@ -114,10 +136,16 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
             setActive(false);
 
             //elimino el mes de los seleccionados
-            let month_select =  _deleteMonthSelected(base_month);
+            let month_select = _deleteMonthSelected(base_month);
             loadDaysPresent(month_select);
-            console.log('months_new');
-            console.log(month_select);
+
+            //cargo la tabla extraccion
+            setIsLoading(true);
+            setIsLoadingTableExtraccion(false);
+            await processQuery(month_select);
+            setIsLoadingTableExtraccion(true);
+            setIsLoading(false);
+
         }
 
     }
@@ -145,7 +173,7 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
 
         monthsSelected.forEach(mon_ => {
 
-            if(month != mon_){
+            if (month != mon_) {
                 mon.push(mon_);
             }
 
@@ -155,6 +183,36 @@ const MonthsItem = ({ text_month, number_month, isPresent, base_month }) => {
         return mon;
 
     }
+
+    const processQuery = async (month_select) => {
+
+        const metadata = await getMetadataFunctionForestal(empresasSelected, rodalesSelected, materialesSelected,
+            elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, month_select,
+            daysSelected);
+
+
+
+        if (metadata) {
+
+            //tengo que traer los datos de costos y luego setear los metadatos
+            const data_extraccion = await getExtraccionDataFunction(empresasSelected, rodalesSelected, materialesSelected,
+                elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, month_select,
+                daysSelected, 1);
+
+            if (data_extraccion) {
+
+                setNumberDataExtraccion(metadata.cantidad);
+                setPagesExtraccion(metadata.pages);
+                setDataExtraccion(data_extraccion);
+
+
+            }
+
+
+        }
+
+    }
+
 
 
     useEffect(() => {

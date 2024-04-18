@@ -1,9 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import EmpresasIcon from '../../../icons/EmpresasIcon';
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
-import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getMaterialesPresentQuery, getMonthsPresentQuery, 
-    getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
+import {
+    getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getExtraccionDataFunction, getMaterialesPresentQuery, getMetadataFunctionForestal, getMonthsPresentQuery,
+  
+    getResumenRDMFunctionForestal,
+    getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery
+} from '../../../utility/Procesamiento';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
+
+import { URL_APP_PINDO } from '../../../utility/URLS';
 
 const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_present }) => {
 
@@ -20,7 +26,9 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
         textStatusQuery, setTextStatusQuery,
-        levels, setLevels
+        levels, setLevels,
+        isLoading, setIsLoading,
+        statusLevels, setStatusLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -72,172 +80,52 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
         daysDinamicData, setDaysDinamicData
     } = useContext(DataGlobalContext);
 
+    const {
+        pagesExtraccion, setPagesExtraccion,
+        numberDataExtraccion, setNumberDataExtraccion,
+        dataExtraccion, setDataExtraccion,
+        isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+        currentPageExtraccion, setCurrentPageExtraccion,
+        dataRDM, setDataRDM,
+        isLoadingTableRDM, setIsLoadingTableRDM,
+        costoElab, setCostoElab,
+        costoTrans, setCostoTrans,
+        toneladas, setToneladas
+    } = useContext(CostosGlobalContext);
+
+
+
+
+
+
+
     const [active, setActive] = useState(false);
 
-
-    const onClickHandler = () => {
-
-
-        if (!active) {
-
-            setActive(!active);
-
-            //uno de los cambios es filtrar los rodales de esta empresa
-            //utilizo dataRodalesDinamic PAra ello
-            let empresas_sel = insertEmpresaToSelected();
-
-            if (statusQuery) {
-
-                //tengo que limpiar todos los datos cada vez que toco una nueva empresa
-                //restauro todos como en el inicio
-                if(textStatusQuery == ORIGIN_QUERY.EMPRESAS){
-
-                    setRodalesSelected([]);
-                    setYearsSelected([]);
-                    setMonthsSelected([]);
-                    setDaysSelected([]);
-                    setMaterialesSelected([])
-                    setElaboradorSelected([]);
-                    setChoferesSelected([]);
-                    setTransportistaSelected([]);
-                    setCompradorSelected([]);
-    
-                    loadYearsPresent(empresas_sel);
-                    loadMonthsPresent(empresas_sel);
-    
-                    loadRodalesPresent(empresas_sel);
-                    loadMaterialesPresent(empresas_sel);
-                    loadElaboradorPresent(empresas_sel);
-                    loadChoferesPresent(empresas_sel);
-                    loadTransportistasPresent(empresas_sel);
-                    loadCompradorPresent(empresas_sel);
-
-                } else {
-
-                     //cargo el lvl
-                     if (!isEmpresaInLevels()) {
+    const buttons = {
+        left: 0,
+        middle: 1,
+        right: 2,
+    };
 
 
-                        //traigo el level
-                        let keys = Object.keys(levels);
-                        let length = keys.length + 1;
-                        let obj = { ...levels };
-                        obj[length] = ORIGIN_QUERY.EMPRESAS;
-                        setLevels(obj);
+    const onClickHandler = async (e) => {
 
-                        //como no estaba se agrego y actualizo 
-                        //tengo que averiguar en que lvl estoy para actualizar los de abajo
-                        //en este caso ya tengo el lvl gracias al lenght
-                        loadDataByLevels(obj, length, empresas_sel);
+        if (e.button === buttons.left) {
 
+            if (!active) {
 
-                    } else {
-                        //consulto el lvl en el que staba seleccionado y actualizo los de abajo
-                        loadDataByLevels(levels, getEmpresaLevels(), empresas_sel);
+                setActive(!active);
 
+                //uno de los cambios es filtrar los rodales de esta empresa
+                //utilizo dataRodalesDinamic PAra ello
+                let empresas_sel = insertEmpresaToSelected();
 
-                    }
+                if (statusQuery) {
 
-                }
+                    //tengo que limpiar todos los datos cada vez que toco una nueva empresa
+                    //restauro todos como en el inicio
+                    if (textStatusQuery == ORIGIN_QUERY.EMPRESAS) {
 
-
-            } else {
-
-                setStatusQuery(true);
-                setTextStatusQuery(ORIGIN_QUERY.EMPRESAS);
-
-                setLevels({ 1: ORIGIN_QUERY.EMPRESAS });
-
-                loadYearsPresent(empresas_sel);
-                loadMonthsPresent(empresas_sel);
-
-                loadRodalesPresent(empresas_sel);
-                loadMaterialesPresent(empresas_sel);
-                loadElaboradorPresent(empresas_sel);
-                loadChoferesPresent(empresas_sel);
-                loadTransportistasPresent(empresas_sel);
-                loadCompradorPresent(empresas_sel);
-
-            }
-
-
-            //filterRodales();
-
-        } else {
-
-            //desactivo el item y borro de la lista de seleccionados
-            setActive(!active);
-            let empresas_sel = deleteEmpresaSelected();
-
-            if (statusQuery) {
-
-                if (textStatusQuery == ORIGIN_QUERY.EMPRESAS) {
-
-
-                    let empresas_sel = deleteEmpresaSelected();
-                    setActive(!active);
-
-                    if (empresas_sel.length == 0) {
-
-                        alert('Restauro todd');
-
-                        //quito el query
-                        setStatusQuery(false);
-                        setTextStatusQuery(null);
-
-                        //restauro todo como al inicio
-
-                        //restauro todos como en el inicio
-                        setRodalesData(rodalesDinamicData);
-                        setRodalesPresent([]);
-                        setRodalesSelected([]);
-                        setStatusRodales(!statusRodales);
-
-                        setYearsData(yearsDinamicData);
-                        setYearsPresent([]);
-                        setStatusYears(!statusYears);
-
-                        //reseteo los meses y dias, inicialmente estan apagados
-                        setMonthsPresent([]);
-                        setMonthsSelected([]);
-                        setStatusMonths(!statusMonths);
-
-                        setDaysPresent([]);
-                        setDaysSelected([]);
-                        setStatusDays(!statusDays);
-
-                        setMaterialesData(materialesDinamicData);
-                        setMaterialesPresent([]);
-                        setMaterialesSelected([])
-                        setStatusMateriales(!statusMateriales);
-
-                        //ME FALTA ELABORADOR
-                        setElaboradorData(elaboradorDinamicData);
-                        setElaboradorPresent([]);
-                        setElaboradorSelected([]);
-                        setStatusElaborador(!statusElaborador);
-
-                        //CHOFERES
-                        setChoferesData(choferesDinamicData);
-                        setChoferesPresent([]);
-                        setChoferesSelected([]);
-                        setStatusChoferes(!statusChoferes);
-
-                        setTransportistaData(transportistaDinamicData);
-                        setTransportistaSelected([]);
-                        setTransportistaPresent([]);
-                        setStatusTransportista(!statusTransportista);
-
-
-                        setCompradorData(compradorDinamicData);
-                        setCompradorPresent([]);
-                        setCompradorSelected([]);
-                        setStatusComprador(!statusComprador);
-
-                    } else {
-
-                        //quedaba una empresa seleccionada, entonces gaho el query con ella
-                        alert('QUedaba 1 empresa');
                         setRodalesSelected([]);
                         setYearsSelected([]);
                         setMonthsSelected([]);
@@ -259,42 +147,327 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
                         loadCompradorPresent(empresas_sel);
 
 
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(empresas_sel);
+                        setIsLoadingTableExtraccion(true);
+
+                        setIsLoading(false);
+
+
+
+                    } else {
+
+                        //cargo el lvl
+                        if (!isEmpresaInLevels()) {
+
+
+                            //traigo el level
+                            let keys = Object.keys(levels);
+                            let length = keys.length + 1;
+                            let obj = { ...levels };
+                            obj[length] = ORIGIN_QUERY.EMPRESAS;
+                            setLevels(obj);
+
+                            setStatusLevels(!statusLevels);
+
+                            //como no estaba se agrego y actualizo 
+                            //tengo que averiguar en que lvl estoy para actualizar los de abajo
+                            //en este caso ya tengo el lvl gracias al lenght
+                            loadDataByLevels(obj, length, empresas_sel);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(empresas_sel);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+
+                        } else {
+                            //consulto el lvl en el que staba seleccionado y actualizo los de abajo
+                            loadDataByLevels(levels, getEmpresaLevels(), empresas_sel);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(empresas_sel);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+
+                        }
+
                     }
 
+
                 } else {
-                  if(empresas_sel.length == 0){
 
-                    let key = Object.keys(levels).filter(function (key) {
-                        return levels[key] ===
-                            ORIGIN_QUERY.EMPRESAS
-                    })[0];
+                    setStatusQuery(true);
+                    setTextStatusQuery(ORIGIN_QUERY.EMPRESAS);
 
-                    _deleteItemFromLevels(key);
+                    setLevels({ 1: ORIGIN_QUERY.EMPRESAS });
+                    setStatusLevels(!statusLevels);
 
-                    //restauro todos sin contar el nivel actual
-                    //no hay materiales seleccionados
-                    loadDataByLevels(levels, key, empresas_sel);
+                    loadYearsPresent(empresas_sel);
+                    loadMonthsPresent(empresas_sel);
 
-                  } else {
+                    loadRodalesPresent(empresas_sel);
+                    loadMaterialesPresent(empresas_sel);
+                    loadElaboradorPresent(empresas_sel);
+                    loadChoferesPresent(empresas_sel);
+                    loadTransportistasPresent(empresas_sel);
+                    loadCompradorPresent(empresas_sel);
 
-                      //quedaba mas de un material, entonce hago la consulta
-                      let key = Object.keys(levels).filter(function (key) {
-                        return levels[key] ===
-                            ORIGIN_QUERY.EMPRESAS
-                    })[0];
+                    //consulto los metadatos
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(empresas_sel);
+                    setIsLoadingTableExtraccion(true);
 
-                    loadDataByLevels(levels, key, empresas_sel);
+                    setIsLoading(false);
 
-                  }
+
                 }
+
+
+                //filterRodales();
+
+            } else {
+
+                //desactivo el item y borro de la lista de seleccionados
+                setActive(!active);
+                let empresas_sel = deleteEmpresaSelected();
+
+                if (statusQuery) {
+
+                    if (textStatusQuery == ORIGIN_QUERY.EMPRESAS) {
+
+
+                        let empresas_sel = deleteEmpresaSelected();
+                        setActive(!active);
+
+                        if (empresas_sel.length == 0) {
+
+                            setIsLoading(true);
+
+                            setTimeout(() => {
+
+                                //quito el query
+                                setStatusQuery(false);
+                                setTextStatusQuery(null);
+                                setLevels(null);
+                                setStatusLevels(!statusLevels);
+
+                                //restauro todo como al inicio
+
+                                //restauro todos como en el inicio
+                                setRodalesData(rodalesDinamicData);
+                                setRodalesPresent([]);
+                                setRodalesSelected([]);
+                                setStatusRodales(!statusRodales);
+
+                                setYearsData(yearsDinamicData);
+                                setYearsPresent([]);
+                                setStatusYears(!statusYears);
+
+                                //reseteo los meses y dias, inicialmente estan apagados
+                                setMonthsPresent([]);
+                                setMonthsSelected([]);
+                                setStatusMonths(!statusMonths);
+
+                                setDaysPresent([]);
+                                setDaysSelected([]);
+                                setStatusDays(!statusDays);
+
+                                setMaterialesData(materialesDinamicData);
+                                setMaterialesPresent([]);
+                                setMaterialesSelected([])
+                                setStatusMateriales(!statusMateriales);
+
+                                //ME FALTA ELABORADOR
+                                setElaboradorData(elaboradorDinamicData);
+                                setElaboradorPresent([]);
+                                setElaboradorSelected([]);
+                                setStatusElaborador(!statusElaborador);
+
+                                //CHOFERES
+                                setChoferesData(choferesDinamicData);
+                                setChoferesPresent([]);
+                                setChoferesSelected([]);
+                                setStatusChoferes(!statusChoferes);
+
+                                setTransportistaData(transportistaDinamicData);
+                                setTransportistaSelected([]);
+                                setTransportistaPresent([]);
+                                setStatusTransportista(!statusTransportista);
+
+
+                                setCompradorData(compradorDinamicData);
+                                setCompradorPresent([]);
+                                setCompradorSelected([]);
+                                setStatusComprador(!statusComprador);
+
+
+                                setIsLoadingTableExtraccion(false);
+                                setDataExtraccion([]);
+                                setCurrentPageExtraccion(1);
+                                setNumberDataExtraccion(null);
+                                setPagesExtraccion(null);
+                                setIsLoadingTableExtraccion(true);
+
+                                setIsLoading(false);
+
+                            }, 1000);
+
+
+
+                        } else {
+
+                            //quedaba una empresa seleccionada, entonces gaho el query con ella
+                          
+                            setRodalesSelected([]);
+                            setYearsSelected([]);
+                            setMonthsSelected([]);
+                            setDaysSelected([]);
+                            setMaterialesSelected([])
+                            setElaboradorSelected([]);
+                            setChoferesSelected([]);
+                            setTransportistaSelected([]);
+                            setCompradorSelected([]);
+
+                            loadYearsPresent(empresas_sel);
+                            loadMonthsPresent(empresas_sel);
+
+                            loadRodalesPresent(empresas_sel);
+                            loadMaterialesPresent(empresas_sel);
+                            loadElaboradorPresent(empresas_sel);
+                            loadChoferesPresent(empresas_sel);
+                            loadTransportistasPresent(empresas_sel);
+                            loadCompradorPresent(empresas_sel);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(empresas_sel);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+
+                        }
+
+                    } else {
+                        if (empresas_sel.length == 0) {
+
+                            let key = Object.keys(levels).filter(function (key) {
+                                return levels[key] ===
+                                    ORIGIN_QUERY.EMPRESAS
+                            })[0];
+
+                            _deleteItemFromLevels(key);
+                            setStatusLevels(!statusLevels);
+
+                            //restauro todos sin contar el nivel actual
+                            //no hay materiales seleccionados
+                            loadDataByLevels(levels, key, empresas_sel);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(empresas_sel);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+                        } else {
+
+                            //quedaba mas de un material, entonce hago la consulta
+                            let key = Object.keys(levels).filter(function (key) {
+                                return levels[key] ===
+                                    ORIGIN_QUERY.EMPRESAS
+                            })[0];
+
+                            loadDataByLevels(levels, key, empresas_sel);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(empresas_sel);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+                        }
+                    }
+
+                }
+
+
 
             }
 
+        } else if (e.button === buttons.right) {
+            
+            let id_empresa_attr = e.currentTarget.getAttribute('idempresa');
 
+            if(id_empresa_attr !== undefined && id_empresa_attr != null){
+                
+                window.open(URL_APP_PINDO.EMPRESAS_VIEW_BY_ID_SAP + id_empresa_attr, "_blank");
+
+            }
+
+           
+
+        }
+
+
+    }
+
+
+    const processQuery = async (empresas_sel) => {
+
+        const metadata = await getMetadataFunctionForestal(empresas_sel, rodalesSelected, materialesSelected,
+            elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+            daysSelected);
+
+     
+
+        if (metadata) {
+
+            //tengo que traer los datos de costos y luego setear los metadatos
+            const data_extraccion = await getExtraccionDataFunction(empresas_sel, rodalesSelected, materialesSelected,
+                elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+                daysSelected, 1);
+
+            if (data_extraccion) {
+
+                setNumberDataExtraccion(metadata.cantidad);
+                setPagesExtraccion(metadata.pages);
+                setCostoElab(metadata.sum_costo_elab);
+                setCostoTrans(metadata.sum_costo_trans);
+                setToneladas(metadata.toneladas);
+
+                setDataExtraccion(data_extraccion);
+
+
+            }
+
+          
+        }
+
+        //traigo los datos para las tabla RDM
+        const dataRDM_ = await getResumenRDMFunctionForestal(empresas_sel, rodalesSelected, materialesSelected,
+            elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+            daysSelected);
+
+        if(dataRDM_){
+
+            setDataRDM(dataRDM_);
 
         }
 
     }
+
+
 
     const insertEmpresaToSelected = () => {
 
@@ -370,26 +543,8 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
 
         });
 
-    
+
         return is_present;
-
-    }
-
-    const getEmpresaLevels = () => {
-
-        let lvl = false;
-
-        Object.entries(levels).forEach(([key, value]) => {
-
-            if (value == ORIGIN_QUERY.EMPRESAS) {
-                lvl = key;
-            }
-
-
-        });
-
-
-        return lvl;
 
     }
 
@@ -596,7 +751,7 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
         }
 
 
-       
+
 
         if (rod_present) {
 
@@ -663,13 +818,13 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
 
             ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects);
-    
+
 
         } else {
 
             ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
                 transp_selects, comp_selects, yearsSelected);
-    
+
 
         }
 
@@ -688,7 +843,7 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
     const loadChoferesPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
+
         let choferes_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -704,7 +859,7 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
 
         }
 
-      
+
 
 
         if (choferes_data) {
@@ -720,7 +875,7 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
     const loadTransportistasPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
+
         let transportista_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -735,7 +890,7 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
 
         }
 
-       
+
 
 
         if (transportista_data) {
@@ -752,8 +907,8 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
     const loadCompradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
-        
+
+
         let comprador_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -767,7 +922,7 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
                 transp_selects, comp_selects, yearsSelected);
 
         }
-      
+
         if (comprador_data) {
 
             setCompradorPresent(comprador_data)
@@ -862,10 +1017,18 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
     }
 
 
+    const loadTableRDM = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+        transp_selects, comp_selects) => 
+    
+    {
+
+
+    }
+
+
 
     const loadDataByLevels = (levels, lvl_current, empresas_sel) => {
 
-        console.log('Levles del material');
 
         //creo variables y si estanlas agrego
         let rodales_ = [];
@@ -921,23 +1084,23 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
 
         });
 
-       
+
         loadYearsPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
         loadMonthsPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
         loadDaysPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
 
-        
-      
+
+
         if (!is_rod) {
             loadRodalesPresentLevels(empresas_sel, materiales_, elaborador_, choferes_, transportista_, comprador_);
         }
 
         if (!is_mat) {
-            loadMaterialesPresentLevels(empresas_sel, materiales_, elaborador_, choferes_, transportista_, comprador_);
+            loadMaterialesPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
         }
 
         if (!is_elab) {
-            console.log('Entro ene elaboradores');
+
             //con los datos disponibles cargo
             loadElaboradorPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
         }
@@ -954,16 +1117,9 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
             loadCompradorPresentLevels(empresas_sel, rodales_, materiales_, elaborador_, choferes_, transportista_, comprador_);
         }
 
-
         //con los datos disponibles cargo
 
-
-
     }
-
-
-
-
 
 
 
@@ -1040,12 +1196,16 @@ const EmpresasItem = ({ name_empresa, idempresa, idEmpresa, setIdEmpresa, is_pre
 
         <>
             {is_present ? <a className="list-group-item list-group-item-action item-layer is_present" aria-current="true"
-                onClick={onClickHandler} style={!active ? null : styles.active}>
-                 <EmpresasIcon></EmpresasIcon>
+                idempresa={idempresa}
+                onContextMenu={(e) => e.preventDefault()}
+                onMouseDown={onClickHandler} style={!active ? null : styles.active}>
+                <EmpresasIcon></EmpresasIcon>
                 {name_empresa}
             </a> :
                 <a className="list-group-item list-group-item-action item-layer" aria-current="true"
-                    onClick={onClickHandler} style={!active ? null : styles.active}>
+                    idempresa={idempresa}
+                    onContextMenu={(e) => e.preventDefault()}
+                    onMouseDown={onClickHandler} style={!active ? null : styles.active}>
                     <EmpresasIcon></EmpresasIcon>
                     {name_empresa}
                 </a>

@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import TransportistaIcons from '../../../icons/TransportistaIcons';
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
-import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getMaterialesPresentQuery, getMonthsPresentQuery, getRodalesPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getExtraccionDataFunction, getMaterialesPresentQuery, getMetadataFunctionForestal, getMonthsPresentQuery, getRodalesPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
 
 const TransportistaItem = ({ name_transportista, idtransportista, is_present, transportista }) => {
 
@@ -44,7 +44,9 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
         textStatusQuery, setTextStatusQuery,
-        levels, setLevels
+        levels, setLevels,
+        isLoading, setIsLoading,
+        statusLevels, setStatusLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -73,11 +75,26 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
         daysPresent, setDaysPresent
     } = useContext(PresentGlobalContext);
 
+    const {
+        pagesExtraccion, setPagesExtraccion,
+        numberDataExtraccion, setNumberDataExtraccion,
+        dataExtraccion, setDataExtraccion,
+        isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+        currentPageExtraccion, setCurrentPageExtraccion,
+        dataRDM, setDataRDM,
+        isLoadingTableRDM, setIsLoadingTableRDM,
+        costoElab, setCostoElab,
+        costoTrans, setCostoTrans,
+        toneladas, setToneladas
+    } = useContext(CostosGlobalContext);
+
+
+
 
     const [active, setActive] = useState(false);
 
 
-    const onClickHandler = () => {
+    const onClickHandler = async () => {
 
         if(!active){
 
@@ -101,6 +118,14 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
                     loadElaboradorPresent(transp_selects, true);
                     loadChoferesPresent(transp_selects, true);
                     loadCompradorPresent(transp_selects, true);
+
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(transp_selects);
+                    setIsLoadingTableExtraccion(true);
+                    setIsLoading(false);
+
+
                 
                 } else {
                  
@@ -111,13 +136,27 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
                         let length = keys.length + 1;
                         let obj = { ...levels };
                         obj[length] = ORIGIN_QUERY.TRANSPORTISTA;
-                        setLevels(obj);
 
-                        loadDataByLevels(obj, length, transp_selects)
+                        setLevels(obj);
+                        setStatusLevels(!statusLevels);
+
+                        loadDataByLevels(obj, length, transp_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(transp_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
                    } else {
                          //consulto el lvl en el que staba seleccionado y actualizo los de abajo
                          loadDataByLevels(levels, getTransportistaLevel(), transp_selects);
+
+                         setIsLoading(true);
+                         setIsLoadingTableExtraccion(false);
+                         await processQuery(transp_selects);
+                         setIsLoadingTableExtraccion(true);
+                         setIsLoading(false);
                    }
 
 
@@ -133,6 +172,7 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
 
                 //Aca deberia setear el lvl tmb
                 setLevels({ 1: ORIGIN_QUERY.TRANSPORTISTA });
+                setStatusLevels(!statusLevels);
 
                 loadYearsPresent(transp_selects, true);
                 loadMonthsPresent(transp_selects, true);
@@ -144,6 +184,12 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
                 loadElaboradorPresent(transp_selects, true);
                 loadChoferesPresent(transp_selects, true);
                 loadCompradorPresent(transp_selects, true);
+
+                setIsLoading(true);
+                setIsLoadingTableExtraccion(false);
+                await processQuery(transp_selects);
+                setIsLoadingTableExtraccion(true);
+                setIsLoading(false);
 
 
 
@@ -163,56 +209,76 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
 
                     if (transportistaSelected.length == 1) {
 
-                        alert('Resteo a los datos desde Transportista');
-    
-                          //llegue al ultimo, entonces cargo todo y limpio el query
-                        setStatusQuery(false);
-                        setTextStatusQuery(null);
+                        setIsLoading(true);
+                        setTimeout(() => {
 
-                        setEmpresasData(empresasDinamicData);
-                        setEmpresasPresent([]);
-                        setStatusEmpresas(!statusEmpresas);
-    
+                            //quito el query
+                            setStatusQuery(false);
+                            setTextStatusQuery(null);
+                            setLevels(null);
+                            setStatusLevels(!statusLevels);
+
+                            //restauro todo como al inicio
+
                             //restauro todos como en el inicio
-                        setRodalesData(rodalesDinamicData);
-                        setRodalesPresent(rodalesDinamicData);
-                        setStatusRodales(!statusRodales);
+                            setRodalesData(rodalesDinamicData);
+                            setRodalesPresent([]);
+                            setRodalesSelected([]);
+                            setStatusRodales(!statusRodales);
+
+                            setYearsData(yearsDinamicData);
+                            setYearsPresent([]);
+                            setStatusYears(!statusYears);
+
+                            //reseteo los meses y dias, inicialmente estan apagados
+                            setMonthsPresent([]);
+                            setMonthsSelected([]);
+                            setStatusMonths(!statusMonths);
+
+                            setDaysPresent([]);
+                            setDaysSelected([]);
+                            setStatusDays(!statusDays);
+
+                            setMaterialesData(materialesDinamicData);
+                            setMaterialesPresent([]);
+                            setMaterialesSelected([])
+                            setStatusMateriales(!statusMateriales);
+
+                            //ME FALTA ELABORADOR
+                            setElaboradorData(elaboradorDinamicData);
+                            setElaboradorPresent([]);
+                            setElaboradorSelected([]);
+                            setStatusElaborador(!statusElaborador);
+
+                            //CHOFERES
+                            setChoferesData(choferesDinamicData);
+                            setChoferesPresent([]);
+                            setChoferesSelected([]);
+                            setStatusChoferes(!statusChoferes);
+
+                            setTransportistaData(transportistaDinamicData);
+                            setTransportistaSelected([]);
+                            setTransportistaPresent([]);
+                            setStatusTransportista(!statusTransportista);
+
+
+                            setCompradorData(compradorDinamicData);
+                            setCompradorPresent([]);
+                            setCompradorSelected([]);
+                            setStatusComprador(!statusComprador);
+
+
+                            setIsLoadingTableExtraccion(false);
+                            setDataExtraccion([]);
+                            setCurrentPageExtraccion(1);
+                            setNumberDataExtraccion(null);
+                            setPagesExtraccion(null);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+                        }, 1000);
     
-                        setYearsData(yearsDinamicData);
-                        setYearsPresent([]);
-                        setStatusYears(!statusYears);
-    
-                        //reseteo los meses y dias, inicialmente estan apagados
-                        setMonthsPresent([]);
-                        setMonthsSelected([]);
-                        setStatusMonths(!statusMonths);
-     
-                        setDaysPresent([]);
-                        setDaysSelected([]);
-                        setStatusDays(!statusDays);
-    
-                        setMaterialesData(materialesDinamicData);
-                        setMaterialesPresent([]);
-                        setMaterialesSelected([])
-                        setStatusMateriales(!statusMateriales);
-    
-                        //ME FALTA ELABORADOR
-                        setElaboradorData(elaboradorDinamicData);
-                        setElaboradorPresent([]);
-                        setElaboradorSelected([]);
-                        setStatusElaborador(!statusElaborador);
-    
-                        //CHOFERES
-                        setChoferesData(choferesDinamicData);
-                        setChoferesPresent([]);
-                        setChoferesSelected([]);
-                        setStatusChoferes(!statusChoferes);
-    
-                    
-                        setCompradorData(compradorDinamicData);
-                        setCompradorPresent([]);
-                        setCompradorSelected([]);
-                        setStatusComprador(!statusComprador);
     
                     } else {
                         alert('Quedabn mas de 1 Transportista seleccionado');
@@ -227,6 +293,12 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
                         loadElaboradorPresent(transp_selects);
                         loadChoferesPresent(transp_selects);
                         loadCompradorPresent(transp_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(transp_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
                     }
 
                 } else {
@@ -243,6 +315,13 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
                         //restauro todos sin contar el nivel actual
                         //no hay materiales seleccionados
                         loadDataByLevels(levels, key, transp_selects);
+                        setStatusLevels(!statusLevels);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(transp_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
                     } else {
 
@@ -252,6 +331,12 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
                         })[0];
 
                         loadDataByLevels(levels, key, transp_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(transp_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
                     }
 
@@ -264,6 +349,38 @@ const TransportistaItem = ({ name_transportista, idtransportista, is_present, tr
         }
     }
 
+
+    const processQuery = async (transp_selects) => {
+
+        const metadata = await getMetadataFunctionForestal(empresasSelected, rodalesSelected, materialesSelected,
+            elaboradorSelected, choferesSelected, transp_selects, compradorSelected, yearsSelected, monthsSelected,
+            daysSelected);
+
+
+
+        if (metadata) {
+
+            //tengo que traer los datos de costos y luego setear los metadatos
+            const data_extraccion = await getExtraccionDataFunction(empresasSelected, rodalesSelected, materialesSelected,
+                elaboradorSelected, choferesSelected, transp_selects, compradorSelected, yearsSelected, monthsSelected,
+                daysSelected, 1);
+
+            if (data_extraccion) {
+
+                setNumberDataExtraccion(metadata.cantidad);
+                setPagesExtraccion(metadata.pages);
+                setCostoElab(metadata.sum_costo_elab);
+                setCostoTrans(metadata.sum_costo_trans);
+                setToneladas(metadata.toneladas);
+                setDataExtraccion(data_extraccion);
+
+
+            }
+
+
+        }
+
+    }
 
 
 

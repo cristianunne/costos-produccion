@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import RodalesIcon from '../../../icons/RodalesIcon'
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
-import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getMaterialesPresentQuery, getMonthsPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
+import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getExtraccionDataFunction, getMaterialesPresentQuery, getMetadataFunctionForestal, getMonthsPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { URL_APP_PINDO } from '../../../utility/URLS';
 
 const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
@@ -43,7 +44,9 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
         textStatusQuery, setTextStatusQuery,
-        levels, setLevels
+        levels, setLevels,
+        isLoading, setIsLoading,
+        statusLevels, setStatusLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -73,48 +76,173 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
     } = useContext(PresentGlobalContext);
 
 
+    const {
+        pagesExtraccion, setPagesExtraccion,
+        numberDataExtraccion, setNumberDataExtraccion,
+        dataExtraccion, setDataExtraccion,
+        isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+        currentPageExtraccion, setCurrentPageExtraccion,
+        dataRDM, setDataRDM,
+        isLoadingTableRDM, setIsLoadingTableRDM,
+        costoElab, setCostoElab,
+        costoTrans, setCostoTrans,
+        toneladas, setToneladas
+    } = useContext(CostosGlobalContext);
+
+
+
     const [active, setActive] = useState(is_active);
 
+    const buttons = {
+        left: 0,
+        middle: 1,
+        right: 2,
+    };
 
-    const onclick = async () => {
 
-        //consulto si esta activo o no
-        if (!active) {
+    const onclick = async (e) => {
 
-            //activo el boton
-            setActive(true);
+        if (e.button === buttons.left) {
 
-            let rodales_sel_ = [...rodalesSelected, name_rodal];
-            setRodalesSelected(rodales_sel_);
+            //consulto si esta activo o no
+            if (!active) {
 
-            //consulto si el query esta seleccionado
-            if (statusQuery) {
+            
+                //activo el boton
+                setActive(true);
 
-                //selecciono el rodal y lo guardo en rodalesSelect
-              
-                //debo consultar quien hizo el query porque dependiendo de eso puedo hacer el load o no
+                let rodales_sel_ = [...rodalesSelected, name_rodal];
+                setRodalesSelected(rodales_sel_);
 
-                if(textStatusQuery == ORIGIN_QUERY.RODALES){
+                //consulto si el query esta seleccionado
+                if (statusQuery) {
 
-                 
-                    alert('estoy en rodales, tengo que traer todo nuevametne sin nada selecccionado');
+                    //selecciono el rodal y lo guardo en rodalesSelect
+                
+                    //debo consultar quien hizo el query porque dependiendo de eso puedo hacer el load o no
 
-                    //como voy a resetar todo los lvls, entonces 
+                    if(textStatusQuery == ORIGIN_QUERY.RODALES){
 
-                    setMaterialesSelected([]);
-                    setChoferesSelected([]);
-                    setElaboradorSelected([]);
-                    setTransportistaSelected([]);
-                    setCompradorSelected([]);
-                    setElaboradorPresent([]);
+
+                        //como voy a resetar todo los lvls, entonces 
+
+                        setMaterialesSelected([]);
+                        setChoferesSelected([]);
+                        setElaboradorSelected([]);
+                        setTransportistaSelected([]);
+                        setCompradorSelected([]);
+                        setElaboradorPresent([]);
+                        
+                        setYearsSelected([]);
+                        setMonthsSelected([]);
+                        setDaysSelected([]);
+                
+                        loadYearsPresent(rodales_sel_, true);
+                        loadMonthsPresent(rodales_sel_, true);
+                        loadDaysPresent(rodales_sel_, true);
+
+                        loadEmpresasPresent(rodales_sel_, true);
+                        loadMaterialesPresent(rodales_sel_, true);
+                        loadElaboradorPresent(rodales_sel_, true);
+                        loadChoferesPresent(rodales_sel_, true);
+                        loadTransportistasPresent(rodales_sel_, true);
+                        loadCompradorPresent(rodales_sel_, true);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(rodales_sel_);
+                        setIsLoadingTableExtraccion(true);
+
+                        setIsLoading(false);
                     
-                    setYearsSelected([]);
-                    setMonthsSelected([]);
-                    setDaysSelected([]);
+                    } else if(textStatusQuery == ORIGIN_QUERY.YEARS){
 
-      
-                   
-             
+                        //DEBERIA CARGAR Y EMPEZAR LOS LEVELS
+
+                        if(!isRodalesInLevels()){
+
+                        
+
+                            //traigo el level
+                            let keys = Object.keys(levels);
+                            let length = keys.length + 1;
+                            let obj = {...levels};
+                            obj[length] = ORIGIN_QUERY.RODALES;
+                            setLevels(obj);
+                            //cargo los elaboradores
+                            loadDataByLevels(obj, length, rodales_sel_);
+
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(rodales_sel_);
+                            setIsLoadingTableExtraccion(true);
+        
+                            setIsLoading(false);
+
+                        } else {
+
+                            loadDataByLevels(levels, getRodalesLevels(), rodales_sel_);
+
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(rodales_sel_);
+                            setIsLoadingTableExtraccion(true);
+        
+                            setIsLoading(false);
+                        }
+
+                    
+
+                    } else {
+
+                        //agrego a ROdales en un lvl
+
+                        //cargo el lvl
+                        if(!isRodalesInLevels()){
+
+                        
+                            //traigo el level
+                            let keys = Object.keys(levels);
+                            let length = keys.length + 1;
+                            let obj = {...levels};
+                            obj[length] = ORIGIN_QUERY.RODALES;
+                            setLevels(obj);
+
+                            setStatusLevels(!statusLevels);
+                            //cargo los elaboradores
+                            loadDataByLevels(obj, length, rodales_sel_);
+
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(rodales_sel_);
+                            setIsLoadingTableExtraccion(true);
+        
+                            setIsLoading(false);
+
+                        
+
+                        } else {
+                            loadDataByLevels(levels, getRodalesLevels(), rodales_sel_);
+
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(rodales_sel_);
+                            setIsLoadingTableExtraccion(true);
+        
+                            setIsLoading(false);
+                        }
+
+                    }
+
+                } else {
+                    //si no esta activo, seteo e query y el texto
+
+                    setStatusQuery(true);
+                    setTextStatusQuery(ORIGIN_QUERY.RODALES);
+
+                    //seteo ellvl
+                    setLevels({1: ORIGIN_QUERY.RODALES});
+                    setStatusLevels(!statusLevels);
+
+
+                    //cargo los present
+
                     loadYearsPresent(rodales_sel_, true);
                     loadMonthsPresent(rodales_sel_, true);
                     loadDaysPresent(rodales_sel_, true);
@@ -125,208 +253,184 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
                     loadChoferesPresent(rodales_sel_, true);
                     loadTransportistasPresent(rodales_sel_, true);
                     loadCompradorPresent(rodales_sel_, true);
-                  
-                } else if(textStatusQuery == ORIGIN_QUERY.YEARS){
 
-                    //DEBERIA CARGAR Y EMPEZAR LOS LEVELS
 
-                    if(!isRodalesInLevels()){
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(rodales_sel_);
+                    setIsLoadingTableExtraccion(true);
 
-                        alert('Rodales no estaba presente');
-
-                        //traigo el level
-                        let keys = Object.keys(levels);
-                        let length = keys.length + 1;
-                        let obj = {...levels};
-                        obj[length] = ORIGIN_QUERY.RODALES;
-                        setLevels(obj);
-                          //cargo los elaboradores
-                        loadDataByLevels(obj, length, rodales_sel_);
-
-                    } else {
-                        loadDataByLevels(levels, getRodalesLevels(), rodales_sel_);
-                    }
-
-                  
-
-                } else {
-
-                    //agrego a ROdales en un lvl
-
-                      //cargo el lvl
-                    if(!isRodalesInLevels()){
-
-                       
-                        //traigo el level
-                        let keys = Object.keys(levels);
-                        let length = keys.length + 1;
-                        let obj = {...levels};
-                        obj[length] = ORIGIN_QUERY.RODALES;
-                        setLevels(obj);
-
-                   
-
-                        //cargo los elaboradores
-                        loadDataByLevels(obj, length, rodales_sel_);
-
-                    } else {
-                        loadDataByLevels(levels, getRodalesLevels(), rodales_sel_);
-                    }
-
+                    setIsLoading(false);
                 }
+
+            
+
 
             } else {
-                //si no esta activo, seteo e query y el texto
+                setActive(false);
 
-                setStatusQuery(true);
-                setTextStatusQuery(ORIGIN_QUERY.RODALES);
+                let rodales_sel_ = _deleteRodalFromSelected(name_rodal);
 
-                //seteo ellvl
-                setLevels({1: ORIGIN_QUERY.RODALES});
+                if(statusQuery){
+
+                    //aca tengo que consultar tmb por donde viene elquery
+                    if(textStatusQuery == ORIGIN_QUERY.RODALES){
+
+                        if (rodales_sel_.length == 0) {
+
+                            setIsLoading(true);
+
+                                setTimeout(() => {
+
+                                    //quito el query
+                                    setStatusQuery(false);
+                                    setTextStatusQuery(null);
+                                    setLevels(null);
+                                    setStatusLevels(!statusLevels);
+
+                                    //restauro todo como al inicio
+
+                                    //restauro todos como en el inicio
+                                    setRodalesData(rodalesDinamicData);
+                                    setRodalesPresent([]);
+                                    setRodalesSelected([]);
+                                    setStatusRodales(!statusRodales);
+
+                                    setYearsData(yearsDinamicData);
+                                    setYearsPresent([]);
+                                    setStatusYears(!statusYears);
+
+                                    //reseteo los meses y dias, inicialmente estan apagados
+                                    setMonthsPresent([]);
+                                    setMonthsSelected([]);
+                                    setStatusMonths(!statusMonths);
+
+                                    setDaysPresent([]);
+                                    setDaysSelected([]);
+                                    setStatusDays(!statusDays);
+
+                                    setMaterialesData(materialesDinamicData);
+                                    setMaterialesPresent([]);
+                                    setMaterialesSelected([])
+                                    setStatusMateriales(!statusMateriales);
+
+                                    //ME FALTA ELABORADOR
+                                    setElaboradorData(elaboradorDinamicData);
+                                    setElaboradorPresent([]);
+                                    setElaboradorSelected([]);
+                                    setStatusElaborador(!statusElaborador);
+
+                                    //CHOFERES
+                                    setChoferesData(choferesDinamicData);
+                                    setChoferesPresent([]);
+                                    setChoferesSelected([]);
+                                    setStatusChoferes(!statusChoferes);
+
+                                    setTransportistaData(transportistaDinamicData);
+                                    setTransportistaSelected([]);
+                                    setTransportistaPresent([]);
+                                    setStatusTransportista(!statusTransportista);
 
 
-                //cargo los present
+                                    setCompradorData(compradorDinamicData);
+                                    setCompradorPresent([]);
+                                    setCompradorSelected([]);
+                                    setStatusComprador(!statusComprador);
 
-                loadYearsPresent(rodales_sel_, true);
-                loadMonthsPresent(rodales_sel_, true);
-                loadDaysPresent(rodales_sel_, true);
 
-                loadEmpresasPresent(rodales_sel_, true);
-                loadMaterialesPresent(rodales_sel_, true);
-                loadElaboradorPresent(rodales_sel_, true);
-                loadChoferesPresent(rodales_sel_, true);
-                loadTransportistasPresent(rodales_sel_, true);
-                loadCompradorPresent(rodales_sel_, true);
+                                    setIsLoadingTableExtraccion(false);
+                                    setDataExtraccion([]);
+                                    setCurrentPageExtraccion(1);
+                                    setNumberDataExtraccion(null);
+                                    setPagesExtraccion(null);
+                                    setIsLoadingTableExtraccion(true);
+
+                                    setIsLoading(false);
+
+                                }, 1000);
+
+                            //reseteo las tablas
+        
+                        } else {
+        
+                        
+                            loadYearsPresent(rodales_sel_, true);
+                            loadMonthsPresent(rodales_sel_, true);
+                            loadDaysPresent(rodales_sel_, true);
+            
+                            loadMaterialesPresent(rodales_sel_, true);
+                            loadElaboradorPresent(rodales_sel_, true);
+                            loadChoferesPresent(rodales_sel_, true);
+                            loadTransportistasPresent(rodales_sel_, true);
+                            loadCompradorPresent(rodales_sel_, true);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(rodales_sel_);
+                            setIsLoadingTableExtraccion(true);
+            
+                            setIsLoading(false);
+                    
+                        }
+        
+
+                    } else {
+
+                        //aca lo que cambia es que tengo que cargar los presents de nue
+                        if(rodalesSelected.length == 1){
+
+                            //tengoque sacar el ROdal del lvl
+                            let key = Object.keys(levels).filter(function(key) {return levels[key] === 
+                                ORIGIN_QUERY.RODALES})[0];
+
+                            _deleteItemFromLevels(key);
+
+                            loadDataByLevels(levels, key, rodales_sel_);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(rodales_sel_);
+                            setIsLoadingTableExtraccion(true);
+            
+                            setIsLoading(false);
+
+                        } else {
+                            //quedan dos rodales
+                            let key = Object.keys(levels).filter(function(key) {return levels[key] === 
+                                ORIGIN_QUERY.RODALES})[0];
+
+                            loadDataByLevels(levels, key, rodales_sel_);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(rodales_sel_);
+                            setIsLoadingTableExtraccion(true);
+            
+                            setIsLoading(false);
+                        }
+
+                    }
+                } 
+
+                //creo que siempre habra un query seleccionado
+            
+
             }
 
+        } else if (e.button === buttons.right) {
 
-        } else {
-            setActive(false);
+            let id_rodal_attr = e.currentTarget.getAttribute('rodal_id');
 
-            let rodales_sel_ = _deleteRodalFromSelected(name_rodal);
-
-            if(statusQuery){
-
-                //aca tengo que consultar tmb por donde viene elquery
-                if(textStatusQuery == ORIGIN_QUERY.RODALES){
-
-                    if (rodalesSelected.length == 1) {
-
-                        alert('Queda 0 rODAL seleccionado');
-
-                        setStatusQuery(false);
-                        setTextStatusQuery(null);
-    
-                        //REseteo ellvl a null porque yano habia nada
-                        setLevels({});
-    
-                             //restauro todos como en el inicio
-                        setRodalesData(rodalesDinamicData);
-                        setRodalesPresent(rodalesDinamicData);
-                        setStatusRodales(!statusRodales);
-     
-                        setYearsData(yearsDinamicData);
-                        setYearsPresent([]);
-                        setStatusYears(!statusYears);
-     
-                         //reseteo los meses y dias, inicialmente estan apagados
-                        setMonthsPresent([]);
-                        setMonthsSelected([]);
-                        setStatusMonths(!statusMonths);
-      
-                        setDaysPresent([]);
-                        setDaysSelected([]);
-                        setStatusDays(!statusDays);
-     
-                        setMaterialesData(materialesDinamicData);
-                        setMaterialesPresent([]);
-                        setMaterialesSelected([])
-                        setStatusMateriales(!statusMateriales);
-     
-                         //ME FALTA ELABORADOR
-                        setElaboradorData(elaboradorDinamicData);
-                        setElaboradorPresent([]);
-                        setElaboradorSelected([]);
-                        setStatusElaborador(!statusElaborador);
-     
-                         //CHOFERES
-                        setChoferesData(choferesDinamicData);
-                        setChoferesPresent([]);
-                        setChoferesSelected([]);
-                        setStatusChoferes(!statusChoferes);
-    
-                        setTransportistaData(transportistaDinamicData);
-                        setTransportistaSelected([]);
-                        setTransportistaPresent([]);
-                        setStatusTransportista(!statusTransportista);
-     
-                     
-                        setCompradorData(compradorDinamicData);
-                        setCompradorPresent([]);
-                        setCompradorSelected([]);
-                        setStatusComprador(!statusComprador);
-    
-                    } else {
-    
-                        alert('Quedabn mas de 1 rODAL seleccionado');
-    
-                        loadYearsPresent(rodales_sel_, true);
-                        loadMonthsPresent(rodales_sel_, true);
-                        loadDaysPresent(rodales_sel_, true);
-        
-                        loadMaterialesPresent(rodales_sel_, true);
-                        loadElaboradorPresent(rodales_sel_, true);
-                        loadChoferesPresent(rodales_sel_, true);
-                        loadTransportistasPresent(rodales_sel_, true);
-                        loadCompradorPresent(rodales_sel_, true);
+            if(id_rodal_attr !== undefined && id_rodal_attr != null){
                 
-                    }
-    
+                window.open(URL_APP_PINDO.RODALES_VIEW_BY_ID_SAP + -1 + '/' + id_rodal_attr, "_blank");
+                
 
-                } else {
-
-                    //aca lo que cambia es que tengo que cargar los presents de nue
-                    if(rodalesSelected.length == 1){
-
-                       alert('Queda un rodal pero desde otro Query');
-                        //tengoque sacar el ROdal del lvl
-                        let key = Object.keys(levels).filter(function(key) {return levels[key] === 
-                            ORIGIN_QUERY.RODALES})[0];
-
-                        _deleteItemFromLevels(key);
-
-                        loadDataByLevels(levels, key, rodales_sel_);
-
-                    } else {
-                        //quedan dos rodales
-                        alert('Queda mas Rodales pero desde otro Query');
-                        let key = Object.keys(levels).filter(function(key) {return levels[key] === 
-                            ORIGIN_QUERY.RODALES})[0];
-
-                        loadDataByLevels(levels, key, rodales_sel_);
-                    }
-
-                }
-            } 
-
-            //creo que siempre habra un query seleccionado
-         
+            }
 
         }
 
-
-    }
-
-    const _clearSelectedsAndPresents = () => {
-
-        setMaterialesSelected([]);
-        setMaterialesPresent([]);
-
-        setYearsSelected([]);
-        setYearsPresent([]);
-
-        setMonthsSelected([]);
-        setMonthsPresent([]);
+      
 
 
     }
@@ -395,14 +499,43 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
     }
 
 
-    const processQuery = () => {
+    const processQuery = async (rodales_sel_) => {
+
+        const metadata = await getMetadataFunctionForestal(empresasSelected, rodales_sel_, materialesSelected,
+            elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+            daysSelected);
+
+       
+
+        if (metadata) {
+
+            //tengo que traer los datos de costos y luego setear los metadatos
+            const data_extraccion = await getExtraccionDataFunction(empresasSelected, rodales_sel_, materialesSelected,
+                elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+                daysSelected, 1);
+
+            if (data_extraccion) {
+
+                setNumberDataExtraccion(metadata.cantidad);
+                setPagesExtraccion(metadata.pages);
+                setCostoElab(metadata.sum_costo_elab);
+                setCostoTrans(metadata.sum_costo_trans);
+                setToneladas(metadata.toneladas);
+                
+                setDataExtraccion(data_extraccion);
+
+
+            }
+
+           
+        }
 
     }
 
     //al seleccionar un rodal tengo que cargar los a;os
 
     const loadYearsPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let years_pres = null;
 
         if(is_reset){
@@ -436,12 +569,13 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
         setStatusYears(!statusYears);
+        setIsLoading(false);
 
     }
 
 
     const loadMonthsPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let months_data = null;
 
         if(is_reset){
@@ -464,12 +598,13 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
         setStatusMonths(!statusMonths);
+        setIsLoading(false);
 
 
     }
 
     const loadDaysPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let days_data = null;
 
         if(is_reset){
@@ -492,12 +627,12 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
         setStatusDays(!statusDays);
-
+        setIsLoading(false);
     }
 
 
     const loadEmpresasPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
 
         let emp_present = null;
 
@@ -539,11 +674,11 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
         //setStatusMateriales(!statusMateriales);
-
+        setIsLoading(false);
     }
 
     const loadMaterialesPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let mat_present = null;
 
         if(is_reset){
@@ -566,10 +701,12 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
         setStatusMateriales(!statusMateriales);
 
+        setIsLoading(false);
+
     }
 
     const loadElaboradorPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let ela_present = null;
 
         //consulto si esta activo yearsquery
@@ -589,8 +726,6 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
         } else {
 
-            alert('deberia entra acacacacacaca');
-
             ela_present = await getElaboradorPresentQuery(empresasSelected, rodales_sel_, materialesSelected, elaboradorSelected, choferesSelected, 
                 transportistaSelected, compradorSelected, yearsSelected);
 
@@ -603,11 +738,11 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
         }
         setStatusElaborador(!statusElaborador);
-
+        setIsLoading(false);
     }
 
     const loadChoferesPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let choferes_data = null;
 
         if(textStatusQuery != ORIGIN_QUERY.YEARS){
@@ -639,10 +774,11 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
         setStatusChoferes(!statusChoferes);
+        setIsLoading(false);
     }
 
     const loadTransportistasPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let transportista_data = null;
 
         if(textStatusQuery != ORIGIN_QUERY.YEARS){
@@ -674,10 +810,12 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
         setStatusTransportista(!statusTransportista);
 
+        setIsLoading(false);
+
     }
 
     const loadCompradorPresent = async (rodales_sel_, is_reset) => {
-
+        setIsLoading(true);
         let comprador_data = null;
 
         if(textStatusQuery != ORIGIN_QUERY.YEARS){
@@ -714,6 +852,8 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
         setStatusComprador(!statusComprador);
 
+        setIsLoading(false);
+
     }
 
 
@@ -722,7 +862,7 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
     const loadYearsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-
+        setIsLoading(true);
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
             let years_pres = await getYearsPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
@@ -749,14 +889,14 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
 
-        
+        setIsLoading(false);
 
     }
 
     const loadMonthsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-            
+            setIsLoading(true);
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
 
@@ -777,13 +917,13 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
 
-
+        setIsLoading(false);
     }
 
     const loadDaysPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-
+            setIsLoading(true);
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
             let days_data = await getDaysPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
@@ -803,14 +943,14 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
 
-       
+        setIsLoading(false);
 
     }
 
 
     const loadMaterialesPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
-
+            setIsLoading(true);
         let mat_present = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -835,13 +975,14 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
         setMaterialesSelected([]);
         setStatusMateriales(!statusMateriales);
-
+        setIsLoading(false);
     }
 
 
     const loadElaboradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
+            setIsLoading(true);
         let ela_present = null;
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
@@ -867,12 +1008,14 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         setElaboradorSelected([]);
         setStatusElaborador(!statusElaborador);
 
+        setIsLoading(false);
+
     }
 
     const loadChoferesPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
+            setIsLoading(true);
         let choferes_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -889,8 +1032,6 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
       
-
-
         if (choferes_data) {
             setChoferesPresent(choferes_data);
             setChoferesSelected([]);
@@ -899,12 +1040,14 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
 
         setChoferesSelected([]);
         setStatusChoferes(!statusChoferes);
+
+        setIsLoading(false);
     }
 
     const loadTransportistasPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
+            setIsLoading(true);
         let transportista_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -930,13 +1073,15 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         setTransportistaSelected([]);
         setStatusTransportista(!statusTransportista);
 
+        setIsLoading(false);
+
     }
 
     const loadCompradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
         
-        
+            setIsLoading(true);
         let comprador_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -960,13 +1105,14 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         setCompradorSelected([]);
 
         setStatusComprador(!statusComprador);
+        setIsLoading(false);
 
     }
 
 
     const loadEmpresasPresentLevels = async (rodales_sel_, is_reset) => {
 
-
+        setIsLoading(true);
         let emp_present = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -1011,6 +1157,8 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         }
 
         //setStatusMateriales(!statusMateriales);
+
+        setIsLoading(false);
 
     }
 
@@ -1150,7 +1298,8 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
         <>
             {!active ?
                 <a className="list-group-item list-group-item-action item-layer bg-dark" aria-current="true"
-                    attr="XOP-5632" rodal_id={idrodal} onClick={onclick}
+                    attr="XOP-5632" rodal_id={idrodal}  onContextMenu={(e) => e.preventDefault()}
+                    onMouseDown={onclick}
                 >
                     <RodalesIcon></RodalesIcon>
 
@@ -1159,7 +1308,7 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
                 :
 
                 <a className="list-group-item list-group-item-action item-layer " aria-current="true"
-                    attr="XOP-5632" rodal_id={idrodal} onClick={onclick}
+                    attr="XOP-5632" rodal_id={idrodal} onMouseDown={onclick} onContextMenu={(e) => e.preventDefault()}
                     style={styles.active}
                 >
                     <RodalesIcon></RodalesIcon>

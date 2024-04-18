@@ -3,7 +3,7 @@
 En este archivo se ejecuta toda la logica de la aplicacion
 */
 
-import { getChoferesPresentAPI, getCompradorPresentAPI, getDaysPresentAPI, getElaboradorPresentAPI, getEmpresasPresentAPI, getMaterialesPresentAPI, getMonthsPresentAPI, getRodalesPresentAPI, getTransportistasPresentAPI, getYearsPresentAPI } from "./Querys";
+import { getChoferesPresentAPI, getCompradorPresentAPI, getDataExtraccionCompletoAPI, getDaysPresentAPI, getElaboradorPresentAPI, getEmpresasPresentAPI, getMaterialesPresentAPI, getMetadataForQueryDataAPI, getMonthsPresentAPI, getResumenRodalDestinoMaterialForestalAPI, getRodalesPresentAPI, getTransportistasPresentAPI, getYearsPresentAPI } from "./Querys";
 
 
 
@@ -193,7 +193,6 @@ export const getRodalesPresentQuery = async (empresa_sel, materiales_sel, elabor
     let filter_data = {};
 
     filter_data['empresa'] = empresa_sel;
-
     filter_data['materiales'] = materiales_sel;
     filter_data['elaborador'] = elaborador_sel;
     filter_data['chofer'] = chofer_sel;
@@ -229,6 +228,76 @@ export const getEmpresasPresentQuery = async (rodales_sel, materiales_sel, elabo
     return ela_present;
 
     
+}
+
+
+export const getMetadataFunctionForestal = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+    transportista_sel, comprador_sel, years_sel, month_sel, days_sel) => {
+
+
+    let filter_data = {};
+
+    filter_data['empresa'] = empresa_sel;
+    filter_data['rodales'] = rodales_sel;
+    filter_data['materiales'] = materiales_sel;
+    filter_data['elaborador'] = elaborador_sel;
+    filter_data['chofer'] = chofer_sel;
+    filter_data['transportista'] = transportista_sel;
+    filter_data['comprador'] = comprador_sel;
+    filter_data['years'] = years_sel;
+    filter_data['months'] = month_sel;
+    filter_data['days'] = days_sel;
+
+    const dataMetadataFromAPI = getMetadataForQueryDataAPI(filter_data);
+
+    return dataMetadataFromAPI;    
+}
+
+
+export const getExtraccionDataFunction = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+    transportista_sel, comprador_sel, years_sel, month_sel, days_sel, page) => {
+
+
+        let filter_data = {};
+
+        filter_data['empresa'] = empresa_sel;
+        filter_data['rodales'] = rodales_sel;
+        filter_data['materiales'] = materiales_sel;
+        filter_data['elaborador'] = elaborador_sel;
+        filter_data['chofer'] = chofer_sel;
+        filter_data['transportista'] = transportista_sel;
+        filter_data['comprador'] = comprador_sel;
+        filter_data['years'] = years_sel;
+        filter_data['months'] = month_sel;
+        filter_data['days'] = days_sel;
+
+        filter_data['page'] = page;
+    
+        const dataExt = getDataExtraccionCompletoAPI(filter_data);
+    
+        return dataExt;    
+}
+
+export const getResumenRDMFunctionForestal = async (empresa_sel, rodales_sel, materiales_sel, elaborador_sel, chofer_sel, 
+    transportista_sel, comprador_sel, years_sel, month_sel, days_sel) => {
+
+
+        let filter_data = {};
+
+        filter_data['empresa'] = empresa_sel;
+        filter_data['rodales'] = rodales_sel;
+        filter_data['materiales'] = materiales_sel;
+        filter_data['elaborador'] = elaborador_sel;
+        filter_data['chofer'] = chofer_sel;
+        filter_data['transportista'] = transportista_sel;
+        filter_data['comprador'] = comprador_sel;
+        filter_data['years'] = years_sel;
+        filter_data['months'] = month_sel;
+        filter_data['days'] = days_sel;
+    
+        const dataExt = getResumenRodalDestinoMaterialForestalAPI(filter_data);
+    
+        return dataExt;    
 }
 
 

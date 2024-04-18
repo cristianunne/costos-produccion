@@ -126,3 +126,15 @@ body::-webkit-scrollbar-thumb {
   color: #ffffff !important;
 }
 
+
+.item-layer-borrar{
+  padding: 5px !important;
+  color: #ffffff;
+  cursor: pointer;
+  border: #6e1310 solid 1px;
+}
+.item-layer-borrar:hover{
+  background-color: #b60000 !important;
+  color: #ffffff !important;
+}
+

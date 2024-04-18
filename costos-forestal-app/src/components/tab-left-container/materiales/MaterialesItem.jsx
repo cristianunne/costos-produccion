@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import MaterialesIcon from '../../../icons/MaterialesIcon'
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
-import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getExtraccionDataFunction, getMetadataFunctionForestal, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
 
 const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
@@ -43,7 +43,9 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
         textStatusQuery, setTextStatusQuery,
-        levels, setLevels
+        levels, setLevels,
+        isLoading, setIsLoading,
+        statusLevels, setStatusLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -73,13 +75,32 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
     } = useContext(PresentGlobalContext);
 
 
+    const {
+        pagesExtraccion, setPagesExtraccion,
+        numberDataExtraccion, setNumberDataExtraccion,
+        dataExtraccion, setDataExtraccion,
+        isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+        currentPageExtraccion, setCurrentPageExtraccion,
+        dataRDM, setDataRDM,
+        isLoadingTableRDM, setIsLoadingTableRDM,
+        costoElab, setCostoElab,
+        costoTrans, setCostoTrans,
+        toneladas, setToneladas
+    } = useContext(CostosGlobalContext);
+
+
+
     const [active, setActive] = useState(false);
 
 
-    const onclickHandler = () => {
+    const onclickHandler = async () => {
 
         if (!active) {
+
+          
             setActive(true);
+
+            setIsLoading(true);
 
             //hago el filtro, pero ahora utilizando el material
             //cargo el material selec
@@ -119,6 +140,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                     loadTransportistasPresent(mat_selects, true);
                     loadCompradorPresent(mat_selects, true);
 
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(mat_selects);
+                    setIsLoadingTableExtraccion(true);
+                    setIsLoading(false);
+
                 } else {
 
 
@@ -133,16 +160,29 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                         let obj = { ...levels };
                         obj[length] = ORIGIN_QUERY.MATERIALES;
                         setLevels(obj);
+                        setStatusLevels(!statusLevels);
 
                         //como no estaba se agrego y actualizo 
                         //tengo que averiguar en que lvl estoy para actualizar los de abajo
                         //en este caso ya tengo el lvl gracias al lenght
                         loadDataByLevels(obj, length, mat_selects);
 
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(mat_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
+
 
                     } else {
                         //consulto el lvl en el que staba seleccionado y actualizo los de abajo
                         loadDataByLevels(levels, getMaterialLevels(), mat_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(mat_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
 
                     }
@@ -160,7 +200,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
                 //Aca deberia setear el lvl tmb
                 setLevels({ 1: ORIGIN_QUERY.MATERIALES });
-
+                setStatusLevels(!statusLevels);
 
                 loadYearsPresent(mat_selects);
                 loadMonthsPresent(mat_selects);
@@ -172,6 +212,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                 loadElaboradorPresent(mat_selects);
                 loadTransportistasPresent(mat_selects);
                 loadCompradorPresent(mat_selects);
+
+                setIsLoading(true);
+                setIsLoadingTableExtraccion(false);
+                await processQuery(mat_selects);
+                setIsLoadingTableExtraccion(true);
+                setIsLoading(false);
 
 
             }
@@ -194,59 +240,75 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
                     if (materialesSelected.length == 1) {
 
-                        alert('Restaurando todos')
+                        setIsLoading(true);
+                        setTimeout(() => {
 
-                        //llegue al ultimo, entonces cargo todo y limpio el query
-                        setStatusQuery(false);
-                        setTextStatusQuery(null);
+                            //quito el query
+                            setStatusQuery(false);
+                            setTextStatusQuery(null);
+                            setLevels(null);
+                            setStatusLevels(!statusLevels);
 
-                        setEmpresasData(empresasDinamicData);
-                        setEmpresasPresent([]);
-                        setStatusEmpresas(!statusEmpresas);
+                            //restauro todo como al inicio
 
-                        //restauro todos como en el inicio
-                        setRodalesData(rodalesDinamicData);
-                        setRodalesPresent(rodalesDinamicData);
-                        setStatusRodales(!statusRodales);
+                            //restauro todos como en el inicio
+                            setRodalesData(rodalesDinamicData);
+                            setRodalesPresent([]);
+                            setRodalesSelected([]);
+                            setStatusRodales(!statusRodales);
 
-                        setYearsData(yearsDinamicData);
-                        setYearsPresent([]);
-                        setStatusYears(!statusYears);
+                            setYearsData(yearsDinamicData);
+                            setYearsPresent([]);
+                            setStatusYears(!statusYears);
 
-                        //reseteo los meses y dias, inicialmente estan apagados
-                        setMonthsPresent([]);
-                        setMonthsSelected([]);
-                        setStatusMonths(!statusMonths);
+                            //reseteo los meses y dias, inicialmente estan apagados
+                            setMonthsPresent([]);
+                            setMonthsSelected([]);
+                            setStatusMonths(!statusMonths);
 
-                        setDaysPresent([]);
-                        setDaysSelected([]);
-                        setStatusDays(!statusDays);
-                        setMaterialesData(materialesDinamicData);
-                        setMaterialesPresent([]);
-                        setMaterialesSelected([])
-                        setStatusMateriales(!statusMateriales);
+                            setDaysPresent([]);
+                            setDaysSelected([]);
+                            setStatusDays(!statusDays);
 
-                        //restauro los elaboradores
-                        setElaboradorData(elaboradorDinamicData);
-                        setElaboradorPresent([]);
-                        setElaboradorSelected([]);
-                        setStatusElaborador(!statusElaborador);
+                            setMaterialesData(materialesDinamicData);
+                            setMaterialesPresent([]);
+                            setMaterialesSelected([])
+                            setStatusMateriales(!statusMateriales);
 
-                        //restauro los choferes
-                        setChoferesData(choferesDinamicData);
-                        setChoferesPresent([]);
-                        setChoferesSelected([]);
-                        setStatusChoferes(!statusChoferes);
+                            //ME FALTA ELABORADOR
+                            setElaboradorData(elaboradorDinamicData);
+                            setElaboradorPresent([]);
+                            setElaboradorSelected([]);
+                            setStatusElaborador(!statusElaborador);
 
-                        setTransportistaData(transportistaDinamicData);
-                        setTransportistaSelected([]);
-                        setTransportistaPresent([]);
-                        setStatusTransportista(!statusTransportista);
+                            //CHOFERES
+                            setChoferesData(choferesDinamicData);
+                            setChoferesPresent([]);
+                            setChoferesSelected([]);
+                            setStatusChoferes(!statusChoferes);
 
-                        setCompradorData(compradorDinamicData);
-                        setCompradorPresent([]);
-                        setCompradorSelected([]);
-                        setStatusComprador(!statusComprador);
+                            setTransportistaData(transportistaDinamicData);
+                            setTransportistaSelected([]);
+                            setTransportistaPresent([]);
+                            setStatusTransportista(!statusTransportista);
+
+
+                            setCompradorData(compradorDinamicData);
+                            setCompradorPresent([]);
+                            setCompradorSelected([]);
+                            setStatusComprador(!statusComprador);
+
+
+                            setIsLoadingTableExtraccion(false);
+                            setDataExtraccion([]);
+                            setCurrentPageExtraccion(1);
+                            setNumberDataExtraccion(null);
+                            setPagesExtraccion(null);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+                        }, 1000);
 
                     } else {
 
@@ -259,6 +321,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                         loadChoferesPresent(mat_selects);
                         loadTransportistasPresent(mat_selects);
                         loadCompradorPresent(mat_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(mat_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
                     }
 
@@ -279,6 +347,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                         //no hay materiales seleccionados
                         loadDataByLevels(levels, key, mat_selects);
 
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(mat_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
+
                     } else {
 
                      
@@ -289,6 +363,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
                         })[0];
 
                         loadDataByLevels(levels, key, mat_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(mat_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
 
                     }
@@ -304,6 +384,42 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         }
     }
+
+
+
+    const processQuery = async (mat_selects) => {
+
+        const metadata = await getMetadataFunctionForestal(empresasSelected, rodalesSelected, mat_selects,
+            elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+            daysSelected);
+
+       
+
+        if (metadata) {
+
+            //tengo que traer los datos de costos y luego setear los metadatos
+            const data_extraccion = await getExtraccionDataFunction(empresasSelected, rodalesSelected, mat_selects,
+                elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+                daysSelected, 1);
+
+            if (data_extraccion) {
+
+                setNumberDataExtraccion(metadata.cantidad);
+                setPagesExtraccion(metadata.pages);
+                setCostoElab(metadata.sum_costo_elab);
+                setCostoTrans(metadata.sum_costo_trans);
+                setToneladas(metadata.toneladas);
+                
+                setDataExtraccion(data_extraccion);
+
+
+            }
+
+           
+        }
+
+    }
+
 
     const isMaterialInLevels = () => {
 
@@ -361,43 +477,6 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         });
 
         setLevels(new_obj);
-
-    }
-
-
-    const verifiedVariablesSelected = (mat_selects, origen) => {
-
-        //SI ES 0, SIGNIFICA QUE PUEDO REPITAR LOS ITEMS EN LOS OTROS, SINO SO
-        //deberia recibir el query activo para traer
-
-        if (elaboradorSelected.length == 0) {
-
-            loadElaboradorPresent(mat_selects);
-        }
-
-        if (choferesSelected.length == 0) {
-
-            //filtro los choferes
-            loadChoferesPresent(mat_selects);
-
-        }
-
-        if (transportistaSelected.length == 0) {
-
-            loadTransportistasPresent(mat_selects);
-
-        }
-
-
-        if (compradorSelected.length == 0) {
-
-            loadCompradorPresent(mat_selects);
-
-        }
-
-
-
-
 
     }
 
@@ -463,7 +542,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
        
         loadYearsPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
         loadMonthsPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
-        loadDaysPresentLevels(rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
+        loadDaysPresentLevels(empresas_, rodales_, mat_selects, elaborador_, choferes_, transportista_, comprador_);
 
 
         if (!is_emp) {
@@ -503,7 +582,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
 
     const loadYearsPresent = async (mat_selects, is_reset) => {
-
+        setIsLoading(true);
         let years_pres = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -538,11 +617,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         } 
 
+        setIsLoading(false);
+
     }
 
 
     const loadMonthsPresent = async (mat_selects, is_reset) => {
-
+        setIsLoading(true);
         let months_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -574,12 +655,12 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
 
         
-
+        setIsLoading(false);
 
     }
 
     const loadDaysPresent = async (mat_selects, is_reset) => {
-
+        setIsLoading(true);
         let days_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -611,13 +692,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
 
         
-
+        setIsLoading(false);
     }
 
 
     const loadYearsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
-
+            setIsLoading(true);
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
@@ -644,7 +725,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         }
 
-
+        setIsLoading(false);
         
 
     }
@@ -652,7 +733,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
     const loadMonthsPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-            
+            setIsLoading(true);
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
 
@@ -672,13 +753,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         }
 
-
+        setIsLoading(false);
 
     }
 
     const loadDaysPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
-
+            setIsLoading(true);
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
@@ -699,13 +780,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
 
 
-       
+        setIsLoading(false);
 
     }
 
 
     const loadElaboradorPresent = async (mat_selects, is_reset) => {
-
+        setIsLoading(true);
         let ela_present = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -737,11 +818,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
         setStatusElaborador(!statusElaborador);
 
+        setIsLoading(false);
+
     }
 
     const loadElaboradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
-
+            setIsLoading(true);
         let ela_present = null;
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
 
@@ -767,10 +850,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         setElaboradorSelected([]);
         setStatusElaborador(!statusElaborador);
 
+        setIsLoading(false);
+
     }
 
     const loadChoferesPresent = async (mat_selects, is_reset) => {
 
+        setIsLoading(true);
         let choferes_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -803,12 +889,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
 
         setStatusChoferes(!statusChoferes);
+
+        setIsLoading(false);
     }
 
     const loadChoferesPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
+            setIsLoading(true);
         let choferes_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -835,10 +923,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         setChoferesSelected([]);
         setStatusChoferes(!statusChoferes);
+
+        setIsLoading(false);
     }
 
     const loadTransportistasPresent = async (mat_selects, is_reset) => {
 
+        setIsLoading(true);
         let transportista_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -871,12 +962,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         setStatusTransportista(!statusTransportista);
 
+        setIsLoading(false);
+
     }
 
     const loadTransportistasPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
+            setIsLoading(true);
         let transportista_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -902,12 +995,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         setTransportistaSelected([]);
         setStatusTransportista(!statusTransportista);
 
+        setIsLoading(false);
+
     }
 
 
 
     const loadCompradorPresent = async (mat_selects, is_reset) => {
-
+        setIsLoading(true);
         let comprador_data = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -942,12 +1037,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         setStatusComprador(!statusComprador);
 
+        setIsLoading(false);
+
     }
 
     const loadCompradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-        
+            setIsLoading(true);
         
         let comprador_data = null;
 
@@ -973,11 +1070,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         setStatusComprador(!statusComprador);
 
+        setIsLoading(false);
+
     }
 
 
     const loadRodalesPresent = async (mat_selects) => {
 
+        setIsLoading(true);
         let rod_present = null;
 
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -1017,6 +1117,8 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
 
         }
 
+        setIsLoading(false);
+
         //setStatusMateriales(!statusMateriales);
 
     }
@@ -1024,6 +1126,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
     const loadRodalesPresentLevels = async (empresas_sel, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
+            setIsLoading(true);
         let rod_present = null;
         //tengo que consultar por elyears
         if (textStatusQuery != ORIGIN_QUERY.YEARS) {
@@ -1066,14 +1169,14 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
 
         //setStatusMateriales(!statusMateriales);
-
+        setIsLoading(false);
     }
 
 
 
     const loadEmpresasPresent = async (mat_selects, is_reset) => {
 
-
+        setIsLoading(true);
         let emp_present = null;
 
         if (is_reset) {
@@ -1113,12 +1216,13 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
 
         //setStatusMateriales(!statusMateriales);
+        setIsLoading(false);
 
     }
 
     const loadEmpresasPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
-
+            setIsLoading(true);
 
         let emp_present = null;
 
@@ -1162,7 +1266,7 @@ const MaterialesItem = ({ material, is_present, idmaterial, is_active }) => {
         }
 
         //setStatusMateriales(!statusMateriales);
-
+        setIsLoading(false);
     }
 
 

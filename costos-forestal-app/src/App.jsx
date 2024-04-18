@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react'
 import TabLeftContainer from './components/tab-left-container/TabLeftContainer'
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from './context/GlobalContext'
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from './context/GlobalContext'
 import YearsBoxContainer from './components/header/years/YearsBoxContainer';
 import { getYearsAPI } from './utility/Querys';
 
 import '../src/styles/DateHeader/dateheader.css'
 import '../src/styles/DateHeader/dayscontainer.css'
+import '../src/styles/CostosContainer/CostosContainer.css'
 
 import MonthsBoxContainer from './components/header/month/MonthsBoxContainer';
 import DaysBoxContainer from './components/header/days/DaysBoxContainer';
+import Loading from './components/alert/Loading';
+import ExtraccionTableContainer from './components/extraccion/ExtraccionTableContainer';
+import ProduccionYearsGraphic from './components/graphics_container/ProduccionYearsGraphic';
+import RMDContainer from './components/RMDExtraccion/RMDContainer';
+import ResumenMain from './components/resumen/ResumenMain';
+
 
 
 function App() {
@@ -65,6 +72,11 @@ function App() {
   const [levels, setLevels] = useState({});
 
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [statusLevels, setStatusLevels] = useState(false);
+
+
 
 
   //creo los SELECTED 
@@ -95,10 +107,25 @@ function App() {
   const [daysPresent, setDaysPresent] = useState([]);
 
 
+  //creo las funciones para las tablas
+  const [pagesExtraccion, setPagesExtraccion] = useState();
+  const [numberDataExtraccion, setNumberDataExtraccion] = useState();
+  const [dataExtraccion, setDataExtraccion] = useState([]);
+  const [isLoadingTableExtraccion, setIsLoadingTableExtraccion] = useState(true);
+  const [currentPageExtraccion, setCurrentPageExtraccion] = useState(1);
+
+
+  const [dataRDM, setDataRDM] = useState([]);
+  const [isLoadingTableRDM, setIsLoadingTableRDM] = useState(true);
+
+  const [costoElab, setCostoElab] = useState(0);
+  const [costoTrans, setCostoTrans] = useState(0);
+  const [toneladas, setToneladas] = useState(0);
 
 
   const getYears = async () => {
 
+    setIsLoading(true);
     const data_years = await getYearsAPI();
 
     if (data_years) {
@@ -110,14 +137,19 @@ function App() {
       setStatusYears(!statusYears);
 
     }
+    setIsLoading(false);
   }
 
   useEffect(() => {
+
+
+
 
     if (!statusYearsGeneral) {
       getYears();
 
     }
+
 
   })
 
@@ -163,11 +195,14 @@ function App() {
           statusDays, setStatusDays,
           statusQuery, setStatusQuery,
           textStatusQuery, setTextStatusQuery,
-          levels, setLevels
+          levels, setLevels,
+          isLoading, setIsLoading,
+          statusLevels, setStatusLevels
 
         }}>
 
           <SelectedGlobalContext.Provider value={{
+
             rodalesSelected, setRodalesSelected,
             empresasSelected, setEmpresasSelected,
             materialesSelected, setMaterialesSelected,
@@ -193,35 +228,89 @@ function App() {
               daysPresent, setDaysPresent
 
             }}>
-              <div className="container" id="container">
+              <CostosGlobalContext.Provider value={{
+                pagesExtraccion, setPagesExtraccion,
+                numberDataExtraccion, setNumberDataExtraccion,
+                dataExtraccion, setDataExtraccion,
+                isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+                currentPageExtraccion, setCurrentPageExtraccion,
+                dataRDM, setDataRDM,
+                isLoadingTableRDM, setIsLoadingTableRDM,
+                costoElab, setCostoElab,
+                costoTrans, setCostoTrans,
+                toneladas, setToneladas
 
-                <div className="row" id='row-container'>
+              }}>
+              <Loading></Loading>
+                <div className="container" id="container">
 
-                  <div className="col-lg-2 bg-dark" id='left-container'>
+                
 
-                    <TabLeftContainer></TabLeftContainer>
+                  <div className="row" id='row-container'>
 
+                    <div className="col-lg-2 bg-dark" id='left-container'>
 
-                  </div>
-
-                  <div className="col-lg-10 d-flex flex-column" id='main-container'>
-
-                    <div className="row pb-3 bg-dark">
-
-                      <YearsBoxContainer></YearsBoxContainer>
-                      <MonthsBoxContainer></MonthsBoxContainer>
-                      <div className="hr-text unset-margin mb-1 mt-1">Dias</div>
-                      <DaysBoxContainer></DaysBoxContainer>
+                      <TabLeftContainer></TabLeftContainer>
 
 
                     </div>
 
+                    <div className="col-lg-10 d-flex flex-column" id='main-container'>
+
+                      <div className="row pb-3 bg-dark">
+
+                        <YearsBoxContainer></YearsBoxContainer>
+                        <MonthsBoxContainer></MonthsBoxContainer>
+                        <div className="hr-text unset-margin mb-1 mt-1">Dias</div>
+                        <DaysBoxContainer></DaysBoxContainer>
+
+
+                      </div>
+
+                      <div className="row" id='costos-container'>
+                        <div className="col-lg-12 mb-5">
+
+                          <div className="row">
+                            <div className="col-lg-8">
+                              <div className="col-12">
+                                <div className="card">
+                                  <div className="card-body">
+                                    <div id="chart-tasks-overview">
+
+                                      <ProduccionYearsGraphic></ProduccionYearsGraphic>
+
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-lg-4">
+
+                              <ResumenMain></ResumenMain>
+
+                            </div>
+                          </div>
+
+                        </div>
+
+                        <div className="col-lg-12">
+                                <ExtraccionTableContainer></ExtraccionTableContainer>
+                        </div>
+
+                        <div className="col-lg-12">
+                                <RMDContainer></RMDContainer>
+                        </div>
+                      </div>
+
+
+                    </div>
 
                   </div>
 
                 </div>
+              </CostosGlobalContext.Provider>
 
-              </div>
+
 
 
             </PresentGlobalContext.Provider>

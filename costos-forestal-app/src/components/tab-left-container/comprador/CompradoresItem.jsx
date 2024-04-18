@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import CompradorIcon from '../../../icons/CompradorIcon';
-import { DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
+import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
-import { getChoferesPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getMaterialesPresentQuery, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { getChoferesPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getExtraccionDataFunction, getMaterialesPresentQuery, getMetadataFunctionForestal, getMonthsPresentQuery, getRodalesPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
 
 const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }) => {
 
@@ -43,7 +43,9 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
         statusDays, setStatusDays,
         statusQuery, setStatusQuery,
         textStatusQuery, setTextStatusQuery,
-        levels, setLevels
+        levels, setLevels,
+        isLoading, setIsLoading,
+        statusLevels, setStatusLevels
     } = useContext(StatusGlobalContext);
 
     const {
@@ -72,12 +74,25 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
         daysPresent, setDaysPresent
     } = useContext(PresentGlobalContext);
 
+    const {
+        pagesExtraccion, setPagesExtraccion,
+        numberDataExtraccion, setNumberDataExtraccion,
+        dataExtraccion, setDataExtraccion,
+        isLoadingTableExtraccion, setIsLoadingTableExtraccion,
+        currentPageExtraccion, setCurrentPageExtraccion,
+        dataRDM, setDataRDM,
+        isLoadingTableRDM, setIsLoadingTableRDM,
+        costoElab, setCostoElab,
+        costoTrans, setCostoTrans,
+        toneladas, setToneladas
+    } = useContext(CostosGlobalContext);
+
 
     const [active, setActive] = useState(false);
 
 
 
-    const onclickHandler = () => {
+    const onclickHandler = async () => {
 
         if (!active) {
 
@@ -92,11 +107,19 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
                     loadYearsPresent(compra_selects, true);
                     loadMonthsPresent(compra_selects, true);
                     loadDaysPresent(compra_selects, true);
+
+                    loadEmpresasPresent(compra_selects, true);
                     loadRodalesPresent(compra_selects, true);
                     loadMaterialesPresent(compra_selects, true);
                     loadElaboradorPresent(compra_selects, true);
                     loadChoferesPresent(compra_selects, true);
                     loadTransportistasPresent(compra_selects, true);
+
+                    setIsLoading(true);
+                    setIsLoadingTableExtraccion(false);
+                    await processQuery(compra_selects);
+                    setIsLoadingTableExtraccion(true);
+                    setIsLoading(false);
 
 
                 } else {
@@ -111,12 +134,24 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
                         obj[length] = ORIGIN_QUERY.COMPRADOR;
                         setLevels(obj);
 
+                        setStatusLevels(!statusLevels);
+                        loadDataByLevels(obj, length, compra_selects);
 
-                        loadDataByLevels(obj, length, compra_selects)
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(compra_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
                     } else {
                         //consulto el lvl en el que staba seleccionado y actualizo los de abajo
                         loadDataByLevels(levels, getCompradorLevel(), compra_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(compra_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
                     }
 
 
@@ -132,15 +167,25 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
                 alert('activo el query de Comprador');
 
                 setLevels({ 1: ORIGIN_QUERY.COMPRADOR });
+                setStatusLevels(!statusLevels);
 
                 loadYearsPresent(compra_selects, true);
                 loadMonthsPresent(compra_selects, true);
                 loadDaysPresent(compra_selects, true);
+
+                loadEmpresasPresent(compra_selects, true);
                 loadRodalesPresent(compra_selects, true);
                 loadMaterialesPresent(compra_selects, true);
                 loadElaboradorPresent(compra_selects, true);
                 loadChoferesPresent(compra_selects, true);
                 loadTransportistasPresent(compra_selects, true);
+
+
+                setIsLoading(true);
+                setIsLoadingTableExtraccion(false);
+                await processQuery(compra_selects);
+                setIsLoadingTableExtraccion(true);
+                setIsLoading(false);
 
 
             }
@@ -158,49 +203,75 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
 
                     if (compradorSelected.length == 1) {
 
-                        //llegue al ultimo, entonces cargo todo y limpio el query
-                        setStatusQuery(false);
-                        setTextStatusQuery(null);
+                        setIsLoading(true);
+                        setTimeout(() => {
 
-                        //restauro todos como en el inicio
-                        setRodalesData(rodalesDinamicData);
-                        setRodalesPresent(rodalesDinamicData);
-                        setStatusRodales(!statusRodales);
+                            //quito el query
+                            setStatusQuery(false);
+                            setTextStatusQuery(null);
+                            setLevels(null);
+                            setStatusLevels(!statusLevels);
 
-                        setYearsData(yearsDinamicData);
-                        setYearsPresent([]);
-                        setStatusYears(!statusYears);
+                            //restauro todo como al inicio
 
-                        //reseteo los meses y dias, inicialmente estan apagados
-                        setMonthsPresent([]);
-                        setMonthsSelected([]);
-                        setStatusMonths(!statusMonths);
+                            //restauro todos como en el inicio
+                            setRodalesData(rodalesDinamicData);
+                            setRodalesPresent([]);
+                            setRodalesSelected([]);
+                            setStatusRodales(!statusRodales);
 
-                        setDaysPresent([]);
-                        setDaysSelected([]);
-                        setStatusDays(!statusDays);
+                            setYearsData(yearsDinamicData);
+                            setYearsPresent([]);
+                            setStatusYears(!statusYears);
 
-                        setMaterialesData(materialesDinamicData);
-                        setMaterialesPresent([]);
-                        setMaterialesSelected([])
-                        setStatusMateriales(!statusMateriales);
+                            //reseteo los meses y dias, inicialmente estan apagados
+                            setMonthsPresent([]);
+                            setMonthsSelected([]);
+                            setStatusMonths(!statusMonths);
 
-                        //ME FALTA ELABORADOR
-                        setElaboradorData(elaboradorDinamicData);
-                        setElaboradorPresent([]);
-                        setElaboradorSelected([]);
-                        setStatusElaborador(!statusElaborador);
+                            setDaysPresent([]);
+                            setDaysSelected([]);
+                            setStatusDays(!statusDays);
 
-                        //CHOFERES
-                        setChoferesData(choferesDinamicData);
-                        setChoferesPresent([]);
-                        setChoferesSelected([]);
-                        setStatusChoferes(!statusChoferes);
+                            setMaterialesData(materialesDinamicData);
+                            setMaterialesPresent([]);
+                            setMaterialesSelected([])
+                            setStatusMateriales(!statusMateriales);
 
-                        setTransportistaData(transportistaDinamicData);
-                        setTransportistaPresent([]);
-                        setTransportistaPresent([]);
-                        setStatusTransportista(!statusTransportista);
+                            //ME FALTA ELABORADOR
+                            setElaboradorData(elaboradorDinamicData);
+                            setElaboradorPresent([]);
+                            setElaboradorSelected([]);
+                            setStatusElaborador(!statusElaborador);
+
+                            //CHOFERES
+                            setChoferesData(choferesDinamicData);
+                            setChoferesPresent([]);
+                            setChoferesSelected([]);
+                            setStatusChoferes(!statusChoferes);
+
+                            setTransportistaData(transportistaDinamicData);
+                            setTransportistaSelected([]);
+                            setTransportistaPresent([]);
+                            setStatusTransportista(!statusTransportista);
+
+
+                            setCompradorData(compradorDinamicData);
+                            setCompradorPresent([]);
+                            setCompradorSelected([]);
+                            setStatusComprador(!statusComprador);
+
+
+                            setIsLoadingTableExtraccion(false);
+                            setDataExtraccion([]);
+                            setCurrentPageExtraccion(1);
+                            setNumberDataExtraccion(null);
+                            setPagesExtraccion(null);
+                            setIsLoadingTableExtraccion(true);
+
+                            setIsLoading(false);
+
+                        }, 1000);
 
 
                     } else {
@@ -210,11 +281,19 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
                             loadYearsPresent(compra_selects, true);
                             loadMonthsPresent(compra_selects, true);
                             loadDaysPresent(compra_selects, true);
+
+                            loadEmpresasPresent(compra_selects, true);
                             loadRodalesPresent(compra_selects, true);
                             loadMaterialesPresent(compra_selects, true);
                             loadElaboradorPresent(compra_selects, true);
                             loadChoferesPresent(compra_selects, true);
                             loadTransportistasPresent(compra_selects, true);
+
+                            setIsLoading(true);
+                            setIsLoadingTableExtraccion(false);
+                            await processQuery(compra_selects);
+                            setIsLoadingTableExtraccion(true);
+                            setIsLoading(false);
 
                         }
                     }
@@ -228,10 +307,17 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
                         })[0];
 
                         _deleteItemFromLevels(key);
+                        setStatusLevels(!statusLevels);
 
                         //restauro todos sin contar el nivel actual
                         //no hay materiales seleccionados
                         loadDataByLevels(levels, key, compra_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(compra_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
                     } else {
 
@@ -241,6 +327,12 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
                         })[0];
 
                         loadDataByLevels(levels, key, compra_selects);
+
+                        setIsLoading(true);
+                        setIsLoadingTableExtraccion(false);
+                        await processQuery(compra_selects);
+                        setIsLoadingTableExtraccion(true);
+                        setIsLoading(false);
 
                     }
                 }
@@ -253,32 +345,35 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
     }
 
 
-    const verifiedVariablesSelected = (compra_selects) => {
+    const processQuery = async (compra_selects) => {
+
+        const metadata = await getMetadataFunctionForestal(empresasSelected, rodalesSelected, materialesSelected,
+            elaboradorSelected, choferesSelected, transportistaSelected, compra_selects, yearsSelected, monthsSelected,
+            daysSelected);
 
 
-        if (materialesSelected.length == 0) {
 
-            loadMaterialesPresent(compra_selects);
+        if (metadata) {
+
+            //tengo que traer los datos de costos y luego setear los metadatos
+            const data_extraccion = await getExtraccionDataFunction(empresasSelected, rodalesSelected, materialesSelected,
+                elaboradorSelected, choferesSelected, transportistaSelected, compra_selects, yearsSelected, monthsSelected,
+                daysSelected, 1);
+
+            if (data_extraccion) {
+
+                setNumberDataExtraccion(metadata.cantidad);
+                setPagesExtraccion(metadata.pages);
+                setCostoElab(metadata.sum_costo_elab);
+                setCostoTrans(metadata.sum_costo_trans);
+                setToneladas(metadata.toneladas);
+                setDataExtraccion(data_extraccion);
+
+
+            }
+
+
         }
-
-        if (elaboradorSelected.length == 0) {
-
-            loadElaboradorPresent(compra_selects);
-        }
-
-        if (choferesSelected.length == 0) {
-
-            loadChoferesPresent(compra_selects);
-        }
-
-        if (transportistaSelected.length == 0) {
-
-            loadTransportistasPresent(compra_selects);
-        }
-
-
-
-
 
     }
 
@@ -787,19 +882,19 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
     const loadChoferesPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-            let choferes_data = null;
+        let choferes_data = null;
 
-            if (textStatusQuery != ORIGIN_QUERY.YEARS) {
-    
-                choferes_data = await getChoferesPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
-                    transp_selects, comp_selects);
-    
-            } else {
-    
-                choferes_data = await getChoferesPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
-                    transp_selects, comp_selects, yearsSelected);
-    
-            }
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+            choferes_data = await getChoferesPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects);
+
+        } else {
+
+            choferes_data = await getChoferesPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects, yearsSelected);
+
+        }
 
 
 
@@ -815,19 +910,19 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
     const loadElaboradorPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-            let ela_present = null;
+        let ela_present = null;
 
-            if (textStatusQuery != ORIGIN_QUERY.YEARS) {
-    
-                ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
-                    transp_selects, comp_selects);
-    
-            } else {
-    
-                ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
-                    transp_selects, comp_selects, yearsSelected);
-    
-            }
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+            ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects);
+
+        } else {
+
+            ela_present = await getElaboradorPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects, yearsSelected);
+
+        }
 
 
         if (ela_present) {
@@ -845,19 +940,19 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
     const loadTransportistasPresentLevels = async (empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
         transp_selects, comp_selects) => {
 
-            let transportista_data = null;
+        let transportista_data = null;
 
-            if (textStatusQuery != ORIGIN_QUERY.YEARS) {
-    
-                transportista_data = await getTransportistasPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
-                    transp_selects, comp_selects);
-    
-            } else {
-    
-                transportista_data = await getTransportistasPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
-                    transp_selects, comp_selects, yearsSelected);
-    
-            }
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+            transportista_data = await getTransportistasPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects);
+
+        } else {
+
+            transportista_data = await getTransportistasPresentQuery(empresas_sel, rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects, yearsSelected);
+
+        }
 
 
         if (transportista_data) {
@@ -867,6 +962,100 @@ const CompradoresItem = ({ name_comprador, id_comprador, is_present, comprador }
 
         setTransportistaSelected([]);
         setStatusTransportista(!statusTransportista);
+
+    }
+
+    const loadEmpresasPresent = async (compra_selects, is_reset) => {
+
+
+        let emp_present = null;
+
+        if (is_reset) {
+            emp_present = await getEmpresasPresentQuery([], [], [], [],
+                [], compra_selects, [], []);
+        } else {
+
+            emp_present = await getEmpresasPresentQuery(rodalesSelected, materialesSelected, elaboradorSelected, choferesSelected,
+                transportistaSelected,
+                compra_selects, [], []);
+
+        }
+
+
+        if (emp_present) {
+
+            let empresas = [];
+
+            emp_present.forEach(emp_pres => {
+                //recorro los rodalesDInamic quetiene todos
+                empresasDinamicData.forEach(emp => {
+
+                    if (emp_pres.idempresa == emp.idempresa) {
+
+                        empresas.push(emp);
+
+                    }
+
+                });
+
+            });
+
+            setEmpresasData(empresas);
+            setEmpresasPresent(empresas);
+            setStatusEmpresas(!statusEmpresas);
+
+        }
+
+        //setStatusMateriales(!statusMateriales);
+
+    }
+
+    const loadEmpresasPresentLevels = async (rod_selects, mat_selects, elab_selects, chof_selects,
+        transp_selects, comp_selects) => {
+
+
+        let emp_present = null;
+
+        if (textStatusQuery != ORIGIN_QUERY.YEARS) {
+
+            emp_present = await getEmpresasPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects, [], []);
+
+        } else {
+
+            emp_present = await getEmpresasPresentQuery(rod_selects, mat_selects, elab_selects, chof_selects,
+                transp_selects, comp_selects, yearsSelected, []);
+
+        }
+
+
+
+
+        if (emp_present) {
+
+            let empresas = [];
+
+            emp_present.forEach(emp_pres => {
+                //recorro los rodalesDInamic quetiene todos
+                empresasDinamicData.forEach(emp => {
+
+                    if (emp_pres.idempresa == emp.idempresa) {
+
+                        empresas.push(emp);
+
+                    }
+
+                });
+
+            });
+
+            setEmpresasData(empresas);
+            setEmpresasPresent(empresas);
+            setStatusEmpresas(!statusEmpresas);
+
+        }
+
+        //setStatusMateriales(!statusMateriales);
 
     }
 

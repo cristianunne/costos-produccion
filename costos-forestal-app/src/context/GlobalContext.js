@@ -56,6 +56,8 @@ const StatusGlobalContext = React.createContext({
 
     levels: {}, setLevels: () => {},
 
+    isLoading: false, setIsLoading: () => {},
+    statusLevels: false, setStatusLevels: () => {},
 
 });
 
@@ -91,6 +93,32 @@ const PresentGlobalContext = React.createContext({
 
 });
 
+/*
+pages, setPages,
+        numberData, setNumberData,
+        dataCostos, setDataCostos, isLoadingTcostos, setIsLoadingTcostos,
+        currentPageCostos, setCurrentPageCostos*/
+
+
+const CostosGlobalContext = React.createContext({ 
+
+    pagesExtraccion: null, setPagesExtraccion: () => {},
+    numberDataExtraccion: null, setNumberDataExtraccion: () => {},
+    dataExtraccion: [], setDataExtraccion: () => {},
+    isLoadingTableExtraccion: false, setIsLoadingTableExtraccion: () => {},
+    currentPageExtraccion: null, setCurrentPageExtraccion: () => {},
+
+    //todos los metodos para la tabla RDM
+    dataRDM: [], setDataRDM: () => {},
+    isLoadingTableRDM: false, setIsLoadingTableRDM: () => {},
+
+    costoElab: 0, setCostoElab: () => {},
+    costoTrans: 0, setCostoTrans: () => {},
+    toneladas: 0, setToneladas: () => {},
+
+
+});
+
 
 
 
@@ -98,3 +126,4 @@ export {DataGlobalContext};
 export {StatusGlobalContext};
 export {SelectedGlobalContext};
 export {PresentGlobalContext};
+export {CostosGlobalContext};

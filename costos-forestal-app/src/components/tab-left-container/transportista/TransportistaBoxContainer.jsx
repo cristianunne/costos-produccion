@@ -82,6 +82,9 @@ const TransportistaBoxContainer = () => {
         let items_ = [];
 
         if(statusQuery){
+
+         
+
             if (transportistaPresent.length > 0) {
 
                 let ites_aux = [];
@@ -116,8 +119,11 @@ const TransportistaBoxContainer = () => {
             } 
 
         } else {
-            if (transportistaPresent.length > 0) {
 
+
+
+            if (transportistaPresent.length > 0) {
+               
                 let ites_aux = [];
     
                 transportistaPresent.forEach(tran_present => {
@@ -148,6 +154,7 @@ const TransportistaBoxContainer = () => {
     
     
             } else {
+               
     
                 Object.entries(transportistas).forEach(([key, value]) => {
     
@@ -193,11 +200,14 @@ const TransportistaBoxContainer = () => {
 
     useEffect(() => {
 
+       
         if(statusQuery){
+         
             createItems(transportistaData);
         } else {
-
+          
             if (transportistaData != null && transportistaData.length > 0) {
+
                 createItems(transportistaData);
     
             } else {

@@ -27,4 +27,19 @@ export const URLS = {
 
     GET_RODALES_PRESENT_FORESTAL: url_api + 'getRodalesPresentForestal',
     GET_EMPRESAS_PRESENT_FORESTAL: url_api + 'getEmpresasPresentForestal',
+
+    GET_METADATA_FOR_QUERY_DATA_FORESTAL: url_api + 'getMetadataForQueryDataForestal',
+    GET_DATA_EXTRACCION_FORESTAL: url_api + 'getDataExtraccionForestal',
+    GET_RESUMEN_PRODUCCION_FORESTAL_BY_YEARS: url_api + 'getResumenProduccionByYears',
+
+    GET_RESUMEN_RDM_FORESTAL: url_api +  'getResumenRodalDestinoMaterialForestal'
+}
+
+
+const url_app_pindo = 'http://localhost:5173/';
+
+export const URL_APP_PINDO = {
+
+    EMPRESAS_VIEW_BY_ID_SAP: url_app_pindo + 'empresas/',
+    RODALES_VIEW_BY_ID_SAP: url_app_pindo + 'rodales/'
 }

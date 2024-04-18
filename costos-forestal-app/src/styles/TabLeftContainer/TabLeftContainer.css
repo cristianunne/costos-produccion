@@ -30,20 +30,28 @@
 
 .tab-selected-container{
     position: inherit;
-    height: 34%;
-    max-height: 36%;
+    height: 26%;
+    max-height: 28%;
     overflow-y: hidden;
     padding-top: 10px;
+    
 }
 
 #items-container-TOC{
-    height: 33vh;
+   height: 20vh;
 
 }
 
 #toc-sub-container{
-    height: 100%;
+    height: 20vh;
     overflow-y: auto;
+
+}
+
+#sr-items-container{
+
+    margin-bottom: 20%;
+
 }
 
 #title-selection-section{

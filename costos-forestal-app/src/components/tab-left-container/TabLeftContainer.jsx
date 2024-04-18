@@ -14,6 +14,7 @@ import ElaboradorBoxContainer from './elaborador/ElaboradorBoxContainer'
 import ChoferesBoxContainer from './choferes/ChoferesBoxContainer'
 import TransportistaBoxContainer from './transportista/TransportistaBoxContainer'
 import CompradoresBoxContainer from './comprador/CompradoresBoxContainer'
+import QueryLevelsTOC from '../querylevels/QueryLevelsTOC'
 
 
 
@@ -67,7 +68,12 @@ const TabLeftContainer = () => {
         statusComprador, setStatusComprador,
         statusYears, setStatusYears,
         statusMonths, setStatusMonths,
-        statusDays, setStatusDays } = useContext(StatusGlobalContext);
+        statusDays, setStatusDays,
+        statusQuery, setStatusQuery,
+        textStatusQuery, setTextStatusQuery,
+        levels, setLevels,
+        isLoading, setIsLoading
+    } = useContext(StatusGlobalContext);
 
     const [reloadTab, setReloadTab] = useState(false);
 
@@ -80,6 +86,7 @@ const TabLeftContainer = () => {
 
     const getEmpresas = async () => {
 
+        setIsLoading(true);
         const data_empresa = await getEmpresasAPI();
 
         if (data_empresa != false) {
@@ -90,11 +97,14 @@ const TabLeftContainer = () => {
             setReloadTab(!reloadTab);
         }
 
+        setIsLoading(false);
+
 
     }
 
     const getRodales = async () => {
 
+        setIsLoading(true);
         const data_rodales = await getRodalesAPI();
 
         if (data_rodales) {
@@ -110,10 +120,12 @@ const TabLeftContainer = () => {
 
 
         }
+        setIsLoading(false);
     }
 
 
     const getMateriales = async () => {
+        setIsLoading(true);
         const data_materiales = await getMaterialesAPI();
 
         if (data_materiales) {
@@ -125,10 +137,12 @@ const TabLeftContainer = () => {
             setReloadTab(!reloadTab);
 
         }
+        setIsLoading(false);
     }
 
     const getElaborador = async () => {
 
+        setIsLoading(true);
         const data_elaborador = await getElaboradorAPI();
 
         if (data_elaborador) {
@@ -140,9 +154,11 @@ const TabLeftContainer = () => {
             setReloadTab(!reloadTab);
 
         }
+        setIsLoading(false);
     }
 
     const getChoferes = async () => {
+        setIsLoading(true);
         const data_choferes = await getChoferesAPI();
 
 
@@ -155,10 +171,13 @@ const TabLeftContainer = () => {
             setReloadTab(!reloadTab);
 
         }
+
+        setIsLoading(false);
     }
 
     const getTransportistas = async () => {
 
+        setIsLoading(true);
         const data_transport = await getTransportistasAPI();
 
 
@@ -171,10 +190,12 @@ const TabLeftContainer = () => {
             setReloadTab(!reloadTab);
 
         }
+        setIsLoading(false);
 
     }
 
     const getCompradores = async () => {
+        setIsLoading(true);
         const data_compradores = await getCompradoresAPI();
 
         if (data_compradores) {
@@ -186,6 +207,7 @@ const TabLeftContainer = () => {
             setReloadTab(!reloadTab);
 
         }
+        setIsLoading(false);
     }
 
 
@@ -237,6 +259,7 @@ const TabLeftContainer = () => {
 
 
     useEffect(() => {
+
 
 
         if (!statusRodalesLocal) {
@@ -304,6 +327,7 @@ const TabLeftContainer = () => {
                     <ItemTabs icono={ICONOS.TRANSPORTISTA} title={'Transportista'} url={'tabs-transportista'} active_status={false} />
                     <ItemTabs icono={ICONOS.COMPRADOR} title={'Comprador'} url={'tabs-comprador'} active_status={false} />
                 </ul>
+
 
             </div>
 
@@ -462,7 +486,16 @@ const TabLeftContainer = () => {
 
 
                 </div>
+
             </div>
+
+            <div className="col-12 tab-selected-container">
+                    
+                <QueryLevelsTOC></QueryLevelsTOC>
+
+            </div>
+
+         
 
         </div>
     )
