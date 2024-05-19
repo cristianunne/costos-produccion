@@ -149,7 +149,8 @@ const YearsBoxContainer = () => {
 
 
         <>
-            {!yearState ? <HeadersYearsPlaceholder></HeadersYearsPlaceholder> : <div className="col-xl-6 pt-3 pb-2">
+            {!yearState ? <HeadersYearsPlaceholder></HeadersYearsPlaceholder> : 
+            <div className="col-xxl-6 col-xl-6 col-lg-12 pt-3 pb-2">
 
                 <div className='d-flex gap-1 years-container justify-content-start'>
                     {listItems}

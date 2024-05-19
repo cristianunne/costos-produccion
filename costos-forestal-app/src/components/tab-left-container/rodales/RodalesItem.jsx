@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import RodalesIcon from '../../../icons/RodalesIcon'
 import { ORIGIN_QUERY } from '../../../utility/OriginQuery';
 import { CostosGlobalContext, DataGlobalContext, PresentGlobalContext, SelectedGlobalContext, StatusGlobalContext } from '../../../context/GlobalContext';
-import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getExtraccionDataFunction, getMaterialesPresentQuery, getMetadataFunctionForestal, getMonthsPresentQuery, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
+import { getChoferesPresentQuery, getCompradorPresentQuery, getDaysPresentQuery, getElaboradorPresentQuery, getEmpresasPresentQuery, getExtraccionDataFunction, getMaterialesPresentQuery, getMetadataFunctionForestal, getMonthsPresentQuery, getResumenRDMFunctionForestal, getTransportistasPresentQuery, getYearsPresentQuery } from '../../../utility/Procesamiento';
 import { URL_APP_PINDO } from '../../../utility/URLS';
 
 const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
@@ -524,11 +524,23 @@ const RodalesItem = ({ name_rodal, idrodal, rodal, is_active }) => {
                 
                 setDataExtraccion(data_extraccion);
 
-
             }
 
            
         }
+
+          //traigo los datos para las tabla RDM
+        const dataRDM_ = await getResumenRDMFunctionForestal(empresasSelected, rodales_sel_, materialesSelected,
+            elaboradorSelected, choferesSelected, transportistaSelected, compradorSelected, yearsSelected, monthsSelected,
+            daysSelected);
+
+        if(dataRDM_){
+
+            setDataRDM(dataRDM_);
+
+        }
+
+
 
     }
 

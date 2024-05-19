@@ -18,7 +18,7 @@ import QueryLevelsTOC from '../querylevels/QueryLevelsTOC'
 
 
 
-const TabLeftContainer = () => {
+const TabLeftContainer = ({leftContainerStatus}) => {
 
     const {
         rodalesData, setRodalesData,
@@ -313,190 +313,193 @@ const TabLeftContainer = () => {
     }, [reloadTab])
 
     return (
-        <div className='container' id='sub-tableft-container'>
-
-            <div className="col-12">
-                <ul className='nav nav-tabs card-header-tabs tabs-header bg-dark'>
-
-                    <ItemTabs icono={ICONOS.EMPRESAS} title={'Empresas'} url={'tabs-empresas-ex2'} active_status={true} />
-                    <ItemTabs icono={ICONOS.RODALES} title={'Rodales'} url={'tabs-rodales-ex1'} active_status={false} />
-                    <ItemTabs icono={ICONOS.MATERIALES} title={'Materiales'} url={'tabs-materiales'} active_status={false} />
-
-                    <ItemTabs icono={ICONOS.ELABORADOR} title={'Elaborador'} url={'tabs-elaborador'} active_status={false} />
-                    <ItemTabs icono={ICONOS.CHOFER} title={'Chofer'} url={'tabs-choferes'} active_status={false} />
-                    <ItemTabs icono={ICONOS.TRANSPORTISTA} title={'Transportista'} url={'tabs-transportista'} active_status={false} />
-                    <ItemTabs icono={ICONOS.COMPRADOR} title={'Comprador'} url={'tabs-comprador'} active_status={false} />
-                </ul>
-
-
-            </div>
-
-            <div className="col-12 tab-content-container">
-                <div className="tab-content">
-
-                    <div className="tab-pane bg-dark active show scrollbar-color" id="tabs-empresas-ex2">
-
-                        {// Agreggo el search de empresas
-                        }
-
-                        <SearchInput onChangeBuscar={null}></SearchInput>
-                        <div className="hr-text unset-margin mb-4">Empresas</div>
-
-                        <div className='items-list-item'>
-
-                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='empresas_items'>
-
-                                <EmpresasBoxContainer>
-
-                                </EmpresasBoxContainer>
-
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-5"></div>
-
-
-                    </div>
-
-                    <div className="tab-pane bg-dark" id="tabs-rodales-ex1">
-
-
-                        <SearchInput onChangeBuscar={onChangeBuscarRodales}></SearchInput>
-
-                        <div className="hr-text unset-margin mb-4 bg-dark">Rodales</div>
-
-                        <div className='items-list-item bg-dark'>
-
-                            <div className="list-group list-group-flush bg-dark" id='rodales_items'>
-
-                                <RodalesBoxContainer></RodalesBoxContainer>
-
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-4"></div>
-
-                    </div>
-
-
-
-
-                    <div className="tab-pane bg-dark" id="tabs-materiales">
-
-                        <SearchInput onChangeBuscar={null} text_place={'Filtrar Material...'}></SearchInput>
-
-                        <div className="hr-text unset-margin mb-4">Materiales</div>
-
-                        <div className='items-list-item'>
-
-                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
-
-                                <MaterialesBoxContainer></MaterialesBoxContainer>
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-5"></div>
-
-
-                    </div>
-
-                    <div className="tab-pane bg-dark" id="tabs-elaborador">
-
-                        <SearchInput onChangeBuscar={null}></SearchInput>
-
-                        <div className="hr-text unset-margin mb-4">Elaborador</div>
-
-                        <div className='items-list-item'>
-
-                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
-
-                                <ElaboradorBoxContainer></ElaboradorBoxContainer>
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-5"></div>
-
-
-                    </div>
-
-                    <div className="tab-pane bg-dark" id="tabs-choferes">
-
-                        <SearchInput onChangeBuscar={null}></SearchInput>
-
-                        <div className="hr-text unset-margin mb-4">Choferes</div>
-
-                        <div className='items-list-item'>
-
-                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
-
-                                <ChoferesBoxContainer></ChoferesBoxContainer>
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-5"></div>
-
-
-                    </div>
-
-                    <div className="tab-pane bg-dark" id="tabs-transportista">
-
-                        <SearchInput onChangeBuscar={null}></SearchInput>
-
-                        <div className="hr-text unset-margin mb-4">Transportista</div>
-
-                        <div className='items-list-item'>
-
-                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
-
-                                <TransportistaBoxContainer></TransportistaBoxContainer>
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-5"></div>
-
-
-                    </div>
-
-                    <div className="tab-pane bg-dark" id="tabs-comprador">
-
-                        <SearchInput onChangeBuscar={null}></SearchInput>
-
-                        <div className="hr-text unset-margin mb-4">Comprador</div>
-
-                        <div className='items-list-item'>
-
-                            <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
-
-                                <CompradoresBoxContainer></CompradoresBoxContainer>
-
-                            </div>
-                        </div>
-
-                        <div className="hr-text unset-margin mb-5"></div>
-
-
-                    </div>
-
+        <div className="col-xxl-2 col-xl-2 col-lg-3 col-md-5 col-sm-12 bg-dark" id='left-container' 
+        style={!leftContainerStatus ? {display: 'fixed', transition: '0.5s', transform: 'translateX(-100%)'} : {transition: '0.5s', transform: 'translateX(0)'}}>
+            <div className='container' id='sub-tableft-container'>
+
+                <div className="col-12">
+                    <ul className='nav nav-tabs card-header-tabs tabs-header bg-dark'>
+
+                        <ItemTabs icono={ICONOS.EMPRESAS} title={'Empresas'} url={'tabs-empresas-ex2'} active_status={true} />
+                        <ItemTabs icono={ICONOS.RODALES} title={'Rodales'} url={'tabs-rodales-ex1'} active_status={false} />
+                        <ItemTabs icono={ICONOS.MATERIALES} title={'Materiales'} url={'tabs-materiales'} active_status={false} />
+
+                        <ItemTabs icono={ICONOS.ELABORADOR} title={'Elaborador'} url={'tabs-elaborador'} active_status={false} />
+                        <ItemTabs icono={ICONOS.CHOFER} title={'Chofer'} url={'tabs-choferes'} active_status={false} />
+                        <ItemTabs icono={ICONOS.TRANSPORTISTA} title={'Transportista'} url={'tabs-transportista'} active_status={false} />
+                        <ItemTabs icono={ICONOS.COMPRADOR} title={'Comprador'} url={'tabs-comprador'} active_status={false} />
+                    </ul>
 
 
                 </div>
 
+                <div className="col-12 tab-content-container">
+                    <div className="tab-content">
+
+                        <div className="tab-pane bg-dark active show scrollbar-color" id="tabs-empresas-ex2">
+
+                            {// Agreggo el search de empresas
+                            }
+
+                            <SearchInput onChangeBuscar={null}></SearchInput>
+                            <div className="hr-text unset-margin mb-4">Empresas</div>
+
+                            <div className='items-list-item'>
+
+                                <div className="list-group list-group-flush bg-dark scrollbar-color" id='empresas_items'>
+
+                                    <EmpresasBoxContainer>
+
+                                    </EmpresasBoxContainer>
+
+
+                                </div>
+                            </div>
+
+                            <div className="hr-text unset-margin mb-5"></div>
+
+
+                        </div>
+
+                        <div className="tab-pane bg-dark" id="tabs-rodales-ex1">
+
+
+                            <SearchInput onChangeBuscar={onChangeBuscarRodales}></SearchInput>
+
+                            <div className="hr-text unset-margin mb-4 bg-dark">Rodales</div>
+
+                            <div className='items-list-item bg-dark'>
+
+                                <div className="list-group list-group-flush bg-dark" id='rodales_items'>
+
+                                    <RodalesBoxContainer></RodalesBoxContainer>
+
+
+                                </div>
+                            </div>
+
+                            <div className="hr-text unset-margin mb-4"></div>
+
+                        </div>
+
+
+
+
+                        <div className="tab-pane bg-dark" id="tabs-materiales">
+
+                            <SearchInput onChangeBuscar={null} text_place={'Filtrar Material...'}></SearchInput>
+
+                            <div className="hr-text unset-margin mb-4">Materiales</div>
+
+                            <div className='items-list-item'>
+
+                                <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
+
+                                    <MaterialesBoxContainer></MaterialesBoxContainer>
+
+                                </div>
+                            </div>
+
+                            <div className="hr-text unset-margin mb-5"></div>
+
+
+                        </div>
+
+                        <div className="tab-pane bg-dark" id="tabs-elaborador">
+
+                            <SearchInput onChangeBuscar={null}></SearchInput>
+
+                            <div className="hr-text unset-margin mb-4">Elaborador</div>
+
+                            <div className='items-list-item'>
+
+                                <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
+
+                                    <ElaboradorBoxContainer></ElaboradorBoxContainer>
+
+                                </div>
+                            </div>
+
+                            <div className="hr-text unset-margin mb-5"></div>
+
+
+                        </div>
+
+                        <div className="tab-pane bg-dark" id="tabs-choferes">
+
+                            <SearchInput onChangeBuscar={null}></SearchInput>
+
+                            <div className="hr-text unset-margin mb-4">Choferes</div>
+
+                            <div className='items-list-item'>
+
+                                <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
+
+                                    <ChoferesBoxContainer></ChoferesBoxContainer>
+
+                                </div>
+                            </div>
+
+                            <div className="hr-text unset-margin mb-5"></div>
+
+
+                        </div>
+
+                        <div className="tab-pane bg-dark" id="tabs-transportista">
+
+                            <SearchInput onChangeBuscar={null}></SearchInput>
+
+                            <div className="hr-text unset-margin mb-4">Transportista</div>
+
+                            <div className='items-list-item'>
+
+                                <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
+
+                                    <TransportistaBoxContainer></TransportistaBoxContainer>
+
+                                </div>
+                            </div>
+
+                            <div className="hr-text unset-margin mb-5"></div>
+
+
+                        </div>
+
+                        <div className="tab-pane bg-dark" id="tabs-comprador">
+
+                            <SearchInput onChangeBuscar={null}></SearchInput>
+
+                            <div className="hr-text unset-margin mb-4">Comprador</div>
+
+                            <div className='items-list-item'>
+
+                                <div className="list-group list-group-flush bg-dark scrollbar-color" id='rodales_items'>
+
+                                    <CompradoresBoxContainer></CompradoresBoxContainer>
+
+                                </div>
+                            </div>
+
+                            <div className="hr-text unset-margin mb-5"></div>
+
+
+                        </div>
+
+
+
+                    </div>
+
+                </div>
+
+                <div className="col-12 tab-selected-container">
+                        
+                    <QueryLevelsTOC></QueryLevelsTOC>
+
+                </div>
+
+            
+
             </div>
-
-            <div className="col-12 tab-selected-container">
-                    
-                <QueryLevelsTOC></QueryLevelsTOC>
-
-            </div>
-
-         
-
         </div>
     )
 }

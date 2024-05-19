@@ -15,6 +15,7 @@ import ExtraccionTableContainer from './components/extraccion/ExtraccionTableCon
 import ProduccionYearsGraphic from './components/graphics_container/ProduccionYearsGraphic';
 import RMDContainer from './components/RMDExtraccion/RMDContainer';
 import ResumenMain from './components/resumen/ResumenMain';
+import ConfigIcon from './icons/ConfigIcon';
 
 
 
@@ -75,6 +76,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [statusLevels, setStatusLevels] = useState(false);
+
+
+  const [leftContainerStatus, setLeftContainerStatus] = useState(false);
 
 
 
@@ -140,16 +144,21 @@ function App() {
     setIsLoading(false);
   }
 
+  const toggleBtnClick = () => {
+
+    setLeftContainerStatus(!leftContainerStatus);
+
+  }
+
+
   useEffect(() => {
-
-
 
 
     if (!statusYearsGeneral) {
       getYears();
 
     }
-
+    console.log('reload')
 
   })
 
@@ -244,18 +253,22 @@ function App() {
               <Loading></Loading>
                 <div className="container" id="container">
 
-                
+                  <div className="bg-dark" id="filter-container">
+                    <button className='btn btn-tabler' onClick={toggleBtnClick} style={leftContainerStatus ? styles.active : null}>
+                      <ConfigIcon></ConfigIcon>
+                    </button>
+                  </div>                
 
                   <div className="row" id='row-container'>
 
-                    <div className="col-lg-2 bg-dark" id='left-container'>
+                   
 
-                      <TabLeftContainer></TabLeftContainer>
+                      <TabLeftContainer leftContainerStatus={leftContainerStatus}></TabLeftContainer>
 
 
-                    </div>
+                    
 
-                    <div className="col-lg-10 d-flex flex-column" id='main-container'>
+                    <div className="col-xxl-10 col-xl-10 col-lg-9 col-md-12 col-sm-12 d-flex flex-column" id='main-container'>
 
                       <div className="row pb-3 bg-dark">
 
@@ -268,10 +281,10 @@ function App() {
                       </div>
 
                       <div className="row" id='costos-container'>
-                        <div className="col-lg-12 mb-5">
+                        <div className="col-xxl-12 col-xl-12 col-lg-12 col-md-12 mb-5">
 
-                          <div className="row">
-                            <div className="col-lg-8">
+                          <div className="row row-costos">
+                            <div className="col-xxl-8 col-xl-8 col-lg-12 col-md-12">
                               <div className="col-12">
                                 <div className="card">
                                   <div className="card-body">
@@ -284,7 +297,7 @@ function App() {
                                 </div>
                               </div>
                             </div>
-                            <div className="col-lg-4">
+                            <div className="col-xxl-4 col-xl-4 col-lg-8 col-md-12">
 
                               <ResumenMain></ResumenMain>
 
@@ -328,3 +341,11 @@ function App() {
 }
 
 export default App
+
+
+const styles = {
+  active: {
+      backgroundColor: '#ae3ec9',
+      color: '#e3e3e3'
+  }
+};
